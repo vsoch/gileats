@@ -26,32 +26,41 @@
         <!-- Map with places - everyone always sees this!-->
         <div id="gmap" class="contact-map"></div>
 
-        <!-- User controls-->
         <div class="container main">
 
-        <div id="pre-auth-section" style="display:none;">
-            <p>This example takes the user through Dropbox's API OAuth flow using <code>Dropbox.getAuthenticationUrl()</code> method [<a href="http://dropbox.github.io/dropbox-sdk-js/Dropbox.html#getAuthenticationUrl">docs</a>] and then uses the generated access token to list the contents of their root directory.</p>
-                <a href="" id="authlink" class="button">Authenticate</a>
-                <p class="info">Once authenticated, it will use the access token to list the files in your root directory.</p>
+            <!-- Show the Add Eats button if not authenticated -->
+            <div id="pre-auth-section" style="display:none;">
+                <a href="" id="authlink" class="button">Add Eats</a>
+                <span class="info">This will allow upload to your Dropbox, but it won't render on the map unless you change the code... this is Gil's Eats!</span>
+            </div>
+
         </div>
 
         <!-- User sees this section after authentication, to add a new place -->
         <div id="authed-section" style="display:none;">
 
-            <form onSubmit="return uploadFiles()">
+        <div class="form">
+            <form class="register-form" onSubmit="return uploadFiles()">
+                <input type="text" placeholder="restaurant name"/>
+                <input type="location" placeholder="location" id="location"/>
+                <input type="text" placeholder="date" id="date"/>
+                <input type="text" placeholder="rating"/>
+                <input type="textarea" placeholder="review"/>
                 <input type="hidden" id="access-token" placeholder="Access token" />
-                <input type="file" id="file-upload" />
-                <button type="submit">Submit</button>
-            </form>
+                <input type="file" id="file-upload" placeholder="picture"/>
+                <button type="submit">nomnom</button> 
+                <!-- A place to show the status of the upload -->
+                <h2 id="results"></h2>
 
-            <!-- A place to show the status of the upload -->
-            <h2 id="results"></h2>
+            </form>
+         </div>
 
             <p>You have successfully authenticated. Below are the contents of your root directory. They were fetched using the SDK and access token.</p>
              <ul id="files"></ul>
         </div>
-    </div>
 
+  <script src="js/jquery.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
   <script>
     var CLIENT_ID = '42zjexze6mfpf7x';
 
@@ -59,7 +68,7 @@
     // generate a json file to go along with it.
     function uploadFiles() {
         var ACCESS_TOKEN = document.getElementById('access-token').value;
-        var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
+        var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });            
         var fileInput = document.getElementById('file-upload');
         var file = fileInput.files[0];
         dbx.filesUpload({path: '/gileats/' + file.name, contents: file})
@@ -74,15 +83,53 @@
         return false;
     }
 
+    function getCookieToken() {
+        return $.cookie('gileats');    
+     }
+
     // Parses the url and gets the access token if it is in the urls hash
-    function getAccessTokenFromUrl() {
-        return utils.parseQueryString(window.location.hash).access_token;
+    function getAccessToken() {
+        // First check to see if we have a cookie token
+        if (!!getCookieToken()) {
+
+            // Does the url have a token?
+            var has_token = !!utils.parseQueryString(window.location.hash).access_token;
+            
+            // If we don't have a token, return False so the user authenticates
+            if (!has_token) {
+                return has_token;
+
+            } else {
+
+               // If we do, the user has authenticated but it's not set yet as a cookie
+               var access_token = utils.parseQueryString(window.location.hash).access_token;
+
+               // Create an instance of Dropbox with the access token 
+               var dbx = new Dropbox({ accessToken: access_token });
+
+               //TODO: this should be service worker
+               // Create folder if it doesn't exist
+               dbx.filesCreateFolder({path: '/gileats'})
+                  .then(function(response) {
+                  console.log(response);
+               })
+               .catch(function(error) {
+                  console.error(error);
+               });
+
+               // Set the access_token in the gileats cookie
+               $.cookie("gileats",access_token);
+            }
+        }
+
+       // At this point, if we haven't returned false, we can return the cookie that was set
+       return getCookieToken();
     }
 
     // If the user was just redirected from authenticating, the urls hash will
     // contain the access token.
-    function isAuthenticated() {
-        return !!getAccessTokenFromUrl();
+    function isAuthenticated() { 
+        return !!getAccessToken();
     }
 
     // Render a list of items to #files
@@ -103,23 +150,27 @@
 
     if (isAuthenticated()) {
 
+        // Fill in the date field
+        document.getElementById('date').value = Date();
+        
         showPageSection('authed-section');
 
-        // Set the hidden field to be the authentication token TODO: use service worker?
-        var access_token = getAccessTokenFromUrl();
+        // Set the hidden field to be the authentication token
+        var access_token = getAccessToken();
         document.getElementById('access-token').value = access_token; 
 
-        // Create an instance of Dropbox with the access token and use it to
-        // fetch and render the files in the users root directory.
+        // Create an instance of Dropbox with the access token 
         var dbx = new Dropbox({ accessToken: access_token });
-        dbx.filesListFolder({path: ''})
+
+        // fetch and render the files in the users root directory.
+        dbx.filesListFolder({path: '/gileats'})
             .then(function(response) {
                 renderItems(response.entries);
              })
             .catch(function(error) {
                 console.error(error);
              });
-    } else {
+        } else {
              
         showPageSection('pre-auth-section');
 
@@ -130,7 +181,6 @@
 
     }
     </script>
-    <script src="js/jquery.js"></script>
     <script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyDhmVSj7xyJsbfI6CmG4AwSa8AKiA7_VaY"></script>
     <script type="text/javascript" src="js/gmaps.js"></script>
     <script async defer src="js/eats.js"></script>

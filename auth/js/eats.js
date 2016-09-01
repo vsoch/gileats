@@ -2,10 +2,13 @@
 
 var map;
 
+var lat = 37.3861;
+var long = -122.0839;
+
 map = new GMaps({
 	el: '#gmap',
-	lat: 37.3861,
-	lng: -122.0839,
+	lat: lat,
+	lng: long,
 	scrollwheel:false,
 	zoom: 16,
 	zoomControl : false,
@@ -18,8 +21,8 @@ map = new GMaps({
 
 var image = '../img/favicon/apple-icon-57x57.png';
 var marker = map.addMarker({
-	lat: 37.3861,
-	lng: -122.0839,
+	lat: lat,
+	lng: long,
 	icon: image,
         draggable: true,
 	animation: google.maps.Animation.DROP,
@@ -27,7 +30,6 @@ var marker = map.addMarker({
 	horizontalAlign: 'center',
 	backgroundColor: '#ffffff',
 });
-
 
 var styles = [ 
 
@@ -74,3 +76,13 @@ map.addStyle({
 });
 
 map.setStyle("map_style");
+
+// Start the lat and long at the current location
+$("#location").val(lat +", "+ long);
+
+// Add event listener to fire a function when the marker is moved
+marker.addListener('dragend', function(evt) {
+    var lat = evt.latLng.lat().toFixed(3);
+    var long = evt.latLng.lng().toFixed(3);
+    $("#location").val(lat +", "+ long);
+});
