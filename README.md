@@ -14,8 +14,9 @@ The most appropriate visualization for this goal is a map. Likely we won't be en
 ### The "database"
 Dropbox has a [nice API](https://dropbox.github.io/dropbox-api-v2-explorer) that is going to let me easily create an application, and then have (Gil) authenticate into his account in order to add a restaurant, which will be done with a form. The data (images and json with comments/review) will be retrieved from this same folder, and this is done on the page load, since
 
+
 **under development**
 
-# write about checks to do before upload (do we have an address? an image file?)
-# write about first wanting to have individual files, realizing I can only get one file statically, and then I would need to keep data in one file, worrying about losing data / feasible to store in one, deciding on solution to keep records individually and update some master file when a new entry is made. Could be errors if the operation is closed when the file is being written, but then it will be re-generated next time an entry is made (and no data is lost)
-# write about decision to make a hash based on location and name for individual record, and also storing a hash of just the location to generate the master file (with a lookup based on the location) - and a choise to use the places API in order to make that set of places finite. 
+- checks to do before upload (do we have an address? an image file?)
+- first wanting to have individual files, realizing I can only get one file statically, and then I would need to keep data in one file, worrying about losing data / feasible to store in one, deciding on solution to keep records individually and update some master file when a new entry is made. Could be errors if the operation is closed when the file is being written, but then it will be re-generated next time an entry is made (and no data is lost)
+- decision to make a hash based on location and name for individual record, and also storing a hash of just the location to generate the master file (with a lookup based on the location) - and a choice to use the places API in order to make that set of places finite. 

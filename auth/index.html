@@ -168,15 +168,31 @@
                // Create an instance of Dropbox with the access token 
                var dbx = new Dropbox({ accessToken: access_token });
 
-               //TODO: this should be service worker
-               // Create folder if it doesn't exist
-               dbx.filesCreateFolder({path: '/gileats'})
-                  .then(function(response) {
-                  console.log(response);
-               })
+               // If gileats folder doesn't exist, create it
+               var create_folder = true;
+               dbx.filesListFolder({path: ''})
+                 .then(function(response) {
+                 $.each(response.entries,function(i,e){
+                     if (e.name == "gileats") {
+                         create_folder = false;
+                     };
+                 });
+
+                  // Create folder if it doesn't exist
+                  if (create_folder == true) {
+                      dbx.filesCreateFolder({path: '/gileats'})
+                          .then(function(response) {
+                              console.log("Successfully created gileats folder!")
+                              console.log(response);
+                      })
+                     .catch(function(error) {
+                          console.error(error);
+                      });
+                  }
+                })
                .catch(function(error) {
-                  console.error(error);
-               });
+                   console.error(error);
+                });
 
                // Set the access_token in the gileats cookie
                $.cookie("gileats",access_token);
