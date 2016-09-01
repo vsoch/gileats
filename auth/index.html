@@ -45,8 +45,8 @@
                 <input id="address-input" class="controls" type="text" placeholder="Enter a location">
                 <input type="hidden" placeholder="location" id="location"/>
                 <input type="text" placeholder="date" id="date"/>
-                <input type="text" placeholder="rating"/>
-                <input type="textarea" placeholder="review"/>
+                <input type="text" placeholder="rating" id="rating"/>
+                <input type="textarea" placeholder="review" id="review"/>
                 <input type="hidden" id="access-token" placeholder="Access token" />
                 <input type="file" id="file-upload" placeholder="picture"/>
                 <button type="submit">nomnom</button> 
@@ -65,24 +65,84 @@
   <script>
     var CLIENT_ID = '42zjexze6mfpf7x';
     
+    // Extend Strings to generate a unique hash code, will be used for image/record unique ids
+    String.prototype.hashCode = function() {
+        var hash = 0, i, chr, len;
+        if (this.length === 0) return hash;
+        for (i = 0, len = this.length; i < len; i++) {
+            chr   = this.charCodeAt(i);
+            hash  = ((hash << 5) - hash) + chr;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return Math.abs(hash);
+    };
+
     // Function to upload an image to dropbox with a specified location, and
     // generate a json file to go along with it.
     function uploadFiles() {
         var ACCESS_TOKEN = document.getElementById('access-token').value;
-        var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });            
+        
+        // Create json record from form, required are an address and image file
+        var address = document.getElementById('address-input').value;    // "Coho Data, Middlefield Road, Palo Alto, CA, United States"
         var fileInput = document.getElementById('file-upload');
-        var file = fileInput.files[0];
-        dbx.filesUpload({path: '/gileats/' + file.name, contents: file})
+        
+        // Has the user made a selection?
+        if ((address != "") && (fileInput.files.length > 0)) {
+            var loc = document.getElementById('location').value              // "37.417157, -122.10435719999998"
+            var datestr = document.getElementById('date').value
+            var rating = document.getElementById('rating').value
+            var review = document.getElementById('review').value
+
+            // Create uid for the entry
+            var uid = (loc + datestr + rating + review).hashCode()
+
+            // Here is our image file
+            var image_file = fileInput.files[0];
+            var filename = uid + "." + image_file.name.split('.').pop();
+
+            var record = {id:uid,
+                          location_id: loc.hashCode(),
+                          image: filename,
+                          name: address, 
+                          location: loc, 
+                          date: datestr,
+                          rating: rating,
+                          review: review};
+
+            var record = [JSON.stringify(record)];
+
+            // Connect to dropbox
+            var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });            
+
+            // Upload individual record file
+            file = new File(record, 'record_' + uid + '.json' ,{type: 'text/json;charset=utf-8'});        
+            dbx.filesUpload({path: '/gileats/' + file.name, contents: file})
             .then(function(response) {
-                var results = document.getElementById('results');
-                results.appendChild(document.createTextNode('File uploaded!'));
-                console.log(response);
+
+                // Now upload image file
+                dbx.filesUpload({path: '/gileats/' + filename, contents: image_file})
+                .then(function(response) {
+                    var results = document.getElementById('results');
+                    results.textContent = 'Image and data uploaded, dawg!' ;
+                    console.log(response);
+                })
+                .catch(function(error) {
+                    console.error(error);
+                });
+
             })
             .catch(function(error) {
                 console.error(error);
             });
-        return false;
+
+        // If address and image not supplied, tell the user
+        } else {
+            var results = document.getElementById('results');
+            results.textContent="Where is the food picture and address? :(";
+        }
+        return false
     }
+
 
     function getCookieToken() {
         return $.cookie('gileats');    
