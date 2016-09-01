@@ -41,8 +41,9 @@
 
         <div class="form">
             <form class="register-form" onSubmit="return uploadFiles()">
-                <input type="text" placeholder="restaurant name"/>
-                <input type="location" placeholder="location" id="location"/>
+                <!-- Restaurant and location search-->
+                <input id="address-input" class="controls" type="text" placeholder="Enter a location">
+                <input type="hidden" placeholder="location" id="location"/>
                 <input type="text" placeholder="date" id="date"/>
                 <input type="text" placeholder="rating"/>
                 <input type="textarea" placeholder="review"/>
@@ -63,7 +64,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
   <script>
     var CLIENT_ID = '42zjexze6mfpf7x';
-
+    
     // Function to upload an image to dropbox with a specified location, and
     // generate a json file to go along with it.
     function uploadFiles() {
@@ -181,7 +182,8 @@
 
     }
     </script>
-    <script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyDhmVSj7xyJsbfI6CmG4AwSa8AKiA7_VaY"></script>
+    <!-- Google maps API, note that we include Places library -->
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyDhmVSj7xyJsbfI6CmG4AwSa8AKiA7_VaY&libraries=places"></script>
     <script type="text/javascript" src="js/gmaps.js"></script>
     <script async defer src="js/eats.js"></script>
 
