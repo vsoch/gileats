@@ -63,6 +63,48 @@
   <script src="js/jquery.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
   <script>
+
+    // Function for sending data to service worker
+    function sendMessage(message) {
+        return new Promise(function(resolve, reject) {
+            var messageChannel = new MessageChannel();
+            messageChannel.port1.onmessage = function(event) {
+                if (event.data.error) {
+                    reject(event.data.error);
+                } else {
+                    resolve(event.data);
+                }
+            };
+            // https://html.spec.whatwg.org/multipage/workers.html#dom-worker-postmessage
+            navigator.serviceWorker.controller.postMessage(message,[messageChannel.port2]);
+        });
+     }
+
+    // Register a service worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(function(registration) {
+            // Registration was successful
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+
+       }).catch(function(err) {
+           // registration failed :(
+           console.log('ServiceWorker registration failed: ', err);
+     });
+    }
+ 
+    /* Function to save data item
+    function addData(key,value) {
+        sendMessage({
+            command: 'add',
+            key: key,
+            value: value
+        }).then(function(e) {
+           console.log('Data', e,'saved successfully!');
+        }).catch(function(error) {
+           console.log('Could not save data',error)
+        }); // If the promise rejects, show the error.
+    };*/
+
     var CLIENT_ID = '42zjexze6mfpf7x';
     
     // Extend Strings to generate a unique hash code, will be used for image/record unique ids
@@ -126,8 +168,34 @@
                     results.textContent = 'Image and data uploaded, dawg!';
                     console.log(response);
  
+                    // TODO: make service workers to perform these functions!
+                    // break functionality of update_map into different functions
+                    // use those functions here to get results, then update the results file
                     // Finally, update the json file with the new entry
-                    
+                    /**
+	 * Create a new file with the contents provided in the request. Do not use this
+	 * to upload a file larger than 150 MB. Instead, create an upload session with
+	 * upload_session/start.
+	 * @function Dropbox#filesUpload
+	 * @arg {Object} arg - The request parameters.
+	 * @arg {Object} arg.contents - The file contents to be uploaded.
+	 * @arg {String} arg.path - Path in the user's Dropbox to save the file.
+	 * @arg {Object} arg.mode - Selects what to do if the file already exists.
+	 * @arg {Boolean} arg.autorename - If there's a conflict, as determined by mode,
+	 * have the Dropbox server try to autorename the file to avoid conflict.
+	 * @arg {Object|null} arg.client_modified - The value to store as the
+	 * client_modified timestamp. Dropbox automatically records the time at which
+	 * the file was written to the Dropbox servers. It can also record an additional
+	 * timestamp, provided by Dropbox desktop clients, mobile clients, and API apps
+	 * of when the file was actually created or modified.
+	 * @arg {Boolean} arg.mute - Normally, users are made aware of any file
+	 * modifications in their Dropbox account via notifications in the client
+	 * software. If true, this tells the clients that this modification shouldn't
+	 * result in a user notification.
+	 * @returns {Object}
+	 */                    
+
+
 
                 })
                 .catch(function(error) {
@@ -200,6 +268,9 @@
 
                // Set the access_token in the gileats cookie
                $.cookie("gileats",access_token);
+
+               // Set the token in the service worker
+               //addData('dbtoken',access_token)
             }
         }
 
