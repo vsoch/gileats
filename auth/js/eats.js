@@ -11,9 +11,9 @@ map = new GMaps({
 	lng: long,
 	scrollwheel:false,
 	zoom: 16,
-	zoomControl : false,
-	panControl : false,
-	streetViewControl : false,
+	zoomControl : true,
+	panControl : true,
+	streetViewControl : true,
 	mapTypeControl: false,
 	overviewMapControl: false,
 	clickable: false
@@ -146,3 +146,75 @@ autocomplete.addListener('place_changed', function() {
     infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
     infowindow.open(map.map, marker);
 });
+
+// Retrieve the records and put them on the map - this URL must not change
+var url = "https://dl.dropboxusercontent.com/s/m6fnsrc573duhyp/db.json?dl=0"
+
+var jqxhr = $.getJSON(url, function(data) {
+       console.log(data);
+
+       // Add a marker for each data point
+       // TODO: this should be done to render points only within viewable range, ok to start since number is tiny :)
+       var contentString = '<div id="content">'+
+            '<div id="siteNotice">'+
+            '</div>'+
+            '<h1 id="firstHeading" class="firstHeading">Uluru</h1>'+
+            '<div id="bodyContent">'+
+            '<p><b>Uluru</b>, also referred to as <b>Ayers Rock</b>, is a large ' +
+            'sandstone rock formation in the southern part of the '+
+            'Northern Territory, central Australia. It lies 335&#160;km (208&#160;mi) '+
+            'south west of the nearest large town, Alice Springs; 450&#160;km '+
+            '(280&#160;mi) by road. Kata Tjuta and Uluru are the two major '+
+            'features of the Uluru - Kata Tjuta National Park. Uluru is '+
+            'sacred to the Pitjantjatjara and Yankunytjatjara, the '+
+            'Aboriginal people of the area. It has many springs, waterholes, '+
+            'rock caves and ancient paintings. Uluru is listed as a World '+
+            'Heritage Site.</p>'+
+            '<p>Attribution: Uluru, <a href="https://en.wikipedia.org/w/index.php?title=Uluru&oldid=297882194">'+
+            'https://en.wikipedia.org/w/index.php?title=Uluru</a> '+
+            '(last visited June 22, 2009).</p>'+
+            '</div>'+
+            '</div>';
+
+        var infowindow = new google.maps.InfoWindow({
+          content: contentString
+        });
+
+        // Here we are adding the listener for each food stop
+        var datum;
+        var address;
+        var lat;
+        var lng;
+        $.each(data,function(location_id,e){
+            console.log(e);
+            console.log(location_id);
+            lat = parseFloat(e.location.split(" ")[0].replace(",",""));
+            lng = parseFloat(e.location.split(" ")[1]);
+            // Each location has multiple records with different pictures
+            $.each(e.records,function(i,e){
+                console.log("Parsing picture " + e + " here...")
+            });
+            
+            // Add all entries to the map as one point   
+            datum = new google.maps.Marker({ position: {lat: lat, lng: lng},
+                                             map: map.map,
+                                             title: location_id // This should be the place name...
+                                           });
+
+            datum.addListener('click', function() {
+                infowindow.open(map.map, marker);
+            })
+        });
+
+    })
+    .done(function() {
+       console.log( "Finished parsing map data!" );
+     })
+    .fail(function(error) {
+        console.log(error);
+     })
+  
+     // Set another completion function for the request above
+     jqxhr.complete(function() {
+         console.log( "second complete" );
+     });

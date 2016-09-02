@@ -20,3 +20,6 @@ Dropbox has a [nice API](https://dropbox.github.io/dropbox-api-v2-explorer) that
 - checks to do before upload (do we have an address? an image file?)
 - first wanting to have individual files, realizing I can only get one file statically, and then I would need to keep data in one file, worrying about losing data / feasible to store in one, deciding on solution to keep records individually and update some master file when a new entry is made. Could be errors if the operation is closed when the file is being written, but then it will be re-generated next time an entry is made (and no data is lost)
 - decision to make a hash based on location and name for individual record, and also storing a hash of just the location to generate the master file (with a lookup based on the location) - and a choice to use the places API in order to make that set of places finite. 
+
+TODO: master db file will somehow need to have reliable link, because it has to be embedded in page. Other files need to be added, and made public,and link saved dynamically for retrieving later. Otherwise, the entire thing has to be static (after user authenticates).
+

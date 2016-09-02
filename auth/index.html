@@ -123,8 +123,12 @@
                 dbx.filesUpload({path: '/gileats/' + filename, contents: image_file})
                 .then(function(response) {
                     var results = document.getElementById('results');
-                    results.textContent = 'Image and data uploaded, dawg!' ;
+                    results.textContent = 'Image and data uploaded, dawg!';
                     console.log(response);
+ 
+                    // Finally, update the json file with the new entry
+                    
+
                 })
                 .catch(function(error) {
                     console.error(error);
