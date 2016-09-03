@@ -145,14 +145,26 @@ autocomplete.addListener('place_changed', function() {
     infowindow.open(map.map, marker);
 });
 
-// Function to get a url
+// Function to get a url, a promise controlling a worker
 function get_url(url) {
-    return $.getJSON(url)
+
+    return new Promise((resolve, reject) => {
+        const worker = new Worker("js/worker.js");
+        worker.onerror = (e) => {
+            worker.terminate();
+            reject(e);
+        };
+        worker.onmessage = (e) => {
+            worker.terminate();
+            resolve(e.data);
+        }
+        worker.postMessage({url:url,"command":"getData"});
+    });
 };
 
 function get_map_data(url){
     url = url || "https://dl.dropboxusercontent.com/s/m6fnsrc573duhyp/db.json?dl=0";
-    return get_url(url); // sorta kinda a promise, not really :)
+    return get_url(url); // This is a promise
 }
 
 // Function to update the (file) database
@@ -166,13 +178,14 @@ function update_db(url) {
 // Function to update the map
 function update_map(url){
 
-    var promise = get_map_data(url);
+    var promise = get_map_data(url); // This is a promise
   
     // TODO: update cache of data from url
 
     // When the data is retrieved, add to map
-    promise.done(function(data) {
+    promise.then(function(data) {
 
+        console.log(data);
         // Add a marker for each data point
         // TODO: this should be done to render points only within viewable range, ok to start since number is tiny :)
 
@@ -208,12 +221,7 @@ function update_map(url){
     
     });
 
-    // If it fails, output error
-    promise.fail(function(error) {
-        console.log(error);
-    });
-
 }
 
-// First call to update_map
+// call update_map the first time
 update_map();
