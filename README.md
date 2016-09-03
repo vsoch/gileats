@@ -23,3 +23,4 @@ Dropbox has a [nice API](https://dropbox.github.io/dropbox-api-v2-explorer) that
 
 TODO: master db file will somehow need to have reliable link, because it has to be embedded in page. Other files need to be added, and made public,and link saved dynamically for retrieving later. Otherwise, the entire thing has to be static (after user authenticates).
 
+A common bug: when you have a worker running via  a promise, the promise will only be resolved if you posta message back. I forgot to do this and was getting pending promise returned, not sure why.
