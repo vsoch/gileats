@@ -5,6 +5,8 @@
     <link href="https://fonts.googleapis.com/css?family=Indie+Flower" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
     <script src="js/utils.js"></script>
 </head>
 <body>
@@ -40,12 +42,59 @@
         <div id="authed-section" style="display:none;">
 
         <div class="form">
-            <form class="register-form" onSubmit="return uploadFiles()">
+            <form class="register-form rating-form" onSubmit="return uploadFiles()">
                 <!-- Restaurant and location search-->
                 <input id="address-input" class="controls" type="text" placeholder="Enter a location">
                 <input type="hidden" placeholder="location" id="location"/>
                 <input type="text" placeholder="date" id="date"/>
-                <input type="text" placeholder="rating" id="rating"/>
+
+                <!--Interactive Stars!-->
+                <fieldset class="form-group">
+                    <legend class="form-legend">Rating:</legend>
+                        <div class="form-item">
+                            <input id="rating-5" name="rating" type="radio" value="5" />
+                            <label for="rating-5" data-value="5">
+                                <span class="rating-star">
+                                    <i class="fa fa-star-o"></i>
+                                    <i class="fa fa-star"></i>
+                                </span>
+                                <span class="ir">5</span>
+                            </label>
+                            <input id="rating-4" name="rating" type="radio" value="4" />
+                            <label for="rating-4" data-value="4">
+                                <span class="rating-star">
+                                    <i class="fa fa-star-o"></i>
+                                    <i class="fa fa-star"></i>
+                                </span>
+                                <span class="ir">4</span>
+                            </label>
+                            <input id="rating-3" name="rating" type="radio" value="3" />
+                            <label for="rating-3" data-value="3">
+                                <span class="rating-star">
+                                    <i class="fa fa-star-o"></i>
+                                    <i class="fa fa-star"></i>
+                                </span>
+                                <span class="ir">3</span>
+                            </label>
+                            <input id="rating-2" name="rating" type="radio" value="2" />
+                            <label for="rating-2" data-value="2">
+                                <span class="rating-star">
+                                    <i class="fa fa-star-o"></i>
+                                    <i class="fa fa-star"></i>
+                                </span>
+                                <span class="ir">2</span>
+                            </label>
+                            <input id="rating-1" name="rating" type="radio" value="1" />
+                            <label for="rating-1" data-value="1">
+                                <span class="rating-star">
+                                    <i class="fa fa-star-o"></i>
+                                    <i class="fa fa-star"></i>
+                                </span>
+                                <span class="ir">1</span>
+                            </label>
+                        </div>
+                    </fieldset>
+
                 <input type="textarea" placeholder="review" id="review"/>
                 <input type="hidden" id="access-token" placeholder="Access token" />
                 <input type="file" id="file-upload" placeholder="picture"/>
@@ -61,26 +110,11 @@
         </div>
 
   <script src="js/jquery.js"></script>
+  <script src="js/worker.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
   <script>
 
-    // Function for sending data to service worker
-    function sendMessage(message) {
-        return new Promise(function(resolve, reject) {
-            var messageChannel = new MessageChannel();
-            messageChannel.port1.onmessage = function(event) {
-                if (event.data.error) {
-                    reject(event.data.error);
-                } else {
-                    resolve(event.data);
-                }
-            };
-            // https://html.spec.whatwg.org/multipage/workers.html#dom-worker-postmessage
-            navigator.serviceWorker.controller.postMessage(message,[messageChannel.port2]);
-        });
-     }
-
-    // Register a service worker
+    /* Register a service worker for caching files
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').then(function(registration) {
             // Registration was successful
@@ -90,21 +124,11 @@
            // registration failed :(
            console.log('ServiceWorker registration failed: ', err);
      });
-    }
- 
-    /* Function to save data item
-    function addData(key,value) {
-        sendMessage({
-            command: 'add',
-            key: key,
-            value: value
-        }).then(function(e) {
-           console.log('Data', e,'saved successfully!');
-        }).catch(function(error) {
-           console.log('Could not save data',error)
-        }); // If the promise rejects, show the error.
-    };*/
+    }*/
 
+    // A worker for running stuffs
+    const worker = new Worker("js/worker.js");
+ 
     var CLIENT_ID = '42zjexze6mfpf7x';
     
     // Extend Strings to generate a unique hash code, will be used for image/record unique ids
@@ -132,7 +156,7 @@
         if ((address != "") && (fileInput.files.length > 0)) {
             var loc = document.getElementById('location').value              // "37.417157, -122.10435719999998"
             var datestr = document.getElementById('date').value
-            var rating = document.getElementById('rating').value
+            var rating = $("input[name='rating']:checked"). val();
             var review = document.getElementById('review').value
 
             // Create uid for the entry
@@ -167,7 +191,20 @@
                     var results = document.getElementById('results');
                     results.textContent = 'Image and data uploaded, dawg!';
                     console.log(response);
+
+                    // Get current results
+
+                    // Add new result to it
  
+                    // Save back to result (override)
+
+                    // Does the url change?
+
+                    // THIS for saving data
+                    // https://advancedweb.hu/2016/08/09/parallel-processing-in-js/?utm_source=codropscollective  
+
+//pr.all for getting all jsons https://www.promisejs.org/patterns/
+
                     // TODO: make service workers to perform these functions!
                     // break functionality of update_map into different functions
                     // use those functions here to get results, then update the results file
@@ -241,6 +278,7 @@
                var dbx = new Dropbox({ accessToken: access_token });
 
                // If gileats folder doesn't exist, create it
+               //TODO: put this into a promise chain
                var create_folder = true;
                dbx.filesListFolder({path: ''})
                  .then(function(response) {

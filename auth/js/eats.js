@@ -145,20 +145,41 @@ autocomplete.addListener('place_changed', function() {
     infowindow.open(map.map, marker);
 });
 
+// Function to get a url
+function get_url(url) {
+    return $.getJSON(url)
+};
+
+function get_map_data(url){
+    url = url || "https://dl.dropboxusercontent.com/s/m6fnsrc573duhyp/db.json?dl=0";
+    return get_url(url); // sorta kinda a promise, not really :)
+}
+
+// Function to update the (file) database
+function update_db(url) {
+
+    // TODO: check here if service worker has data cached
+    var promise = get_map_data(url);
+
+}
+
+// Function to update the map
 function update_map(url){
 
-    // Retrieve the records and put them on the map, default is Gil's eats!
-    url = url || "https://dl.dropboxusercontent.com/s/m6fnsrc573duhyp/db.json?dl=0";
+    var promise = get_map_data(url);
+  
+    // TODO: update cache of data from url
 
-    var jqxhr = $.getJSON(url, function(data) {
+    // When the data is retrieved, add to map
+    promise.done(function(data) {
 
         // Add a marker for each data point
         // TODO: this should be done to render points only within viewable range, ok to start since number is tiny :)
 
         // Here we are adding the listener for each food stop
         $.each(data,function(location_id,e){
-            console.log(e);
-            console.log(location_id);
+
+            // Parse latitude and longitude from "location"
             var lat = parseFloat(e.location.split(" ")[0].replace(",",""));
             var lng = parseFloat(e.location.split(" ")[1]);
 
@@ -184,20 +205,15 @@ function update_map(url){
                 infowindow.open(map.map, this);
             })
         });
+    
+    });
 
-    })
-    .done(function() {
-       console.log( "Finished parsing map data!" );
-     })
-    .fail(function(error) {
+    // If it fails, output error
+    promise.fail(function(error) {
         console.log(error);
-     })
-  
-     // Set another completion function for the request above
-     jqxhr.complete(function() {
-         console.log( "second complete" );
-     });
+    });
 
 }
 
+// First call to update_map
 update_map();
