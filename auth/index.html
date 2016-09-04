@@ -134,8 +134,6 @@
            console.log('ServiceWorker registration failed: ', err);
      });
     }*/
-
-    var CLIENT_ID = '42zjexze6mfpf7x';
     
     function getCookieToken() {
         return $.cookie('gileats');    
@@ -160,7 +158,6 @@
                // If gileats folder doesn't exist, create it
                createFolder('','gileats',access_token) // this is a promise
                .then(function(response) {
-
                    // Set the access_token in the gileats cookie
                    $.cookie("gileats",access_token);
                });
@@ -215,16 +212,19 @@
             .catch(function(error) {
                 console.error(error);
              });
+
+        /* NOT AUTHENTICATED */
         } else {
              
-        showPageSection('pre-auth-section');
+           showPageSection('pre-auth-section');
 
-        // Set the login anchors href using dbx.getAuthenticationUrl()
-        var dbx = new Dropbox({ clientId: CLIENT_ID });
-        var authUrl = dbx.getAuthenticationUrl('http://localhost:8080/auth');
-        document.getElementById('authlink').href = authUrl;
+           // Set the login anchors href using dbx.getAuthenticationUrl()
+           var CLIENT_ID = '42zjexze6mfpf7x';
+           var dbx = new Dropbox({ clientId: CLIENT_ID });
+           var authUrl = dbx.getAuthenticationUrl('http://localhost:8080/auth');
+           document.getElementById('authlink').href = authUrl;
 
-    }
+        }
 
     </script>
 </body>

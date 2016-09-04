@@ -189,31 +189,102 @@ function get_url(url) {
 
 
 // Download a file (json) from Dropbox
-function dropbox_download(path) {
+function update_data(data,access_token) {
  
-    path = path || "/gileats/";
-
     return new Promise((resolve, reject) => {
-        const worker = new Worker("js/worker.js");
-        worker.onerror = (e) => {
-            worker.terminate();
-            reject(e);
-        };
-        worker.onmessage = (e) => {
-            worker.terminate();
-            resolve(e.data);
-        }
-        worker.postMessage({ access_token:access_token,
-                             path:path,
-                             command:"filesGetDropbox"});
+
+        path = "/gileats";
+
+        var dbx = new Dropbox({ accessToken: access_token });            
+        var content = [JSON.stringify(data)];
+
+        update = new File(content, 'db.json', {type: 'text/json;charset=utf-8'});        
+        dbx.filesUpload({path: path + '/' + update.name, 
+                         contents: update,
+                         mode:'overwrite'})
+        .then(function(response) {
+            console.log(response);
+            resolve(response);
+        })
+        .catch(function(error) {
+            console.error(error);
+            resolve(error);
+        });
     });
 };
 
+// Update entire database file (must be run manually)
+function bigUpdate(access_token) {
+
+    var dbx = new Dropbox({ accessToken: access_token });            
+        
+    // Create gileats folder, but overwrite old database
+    createFolder('','gileats',access_token,'overwrite') // this is a promise
+    .then(function(response) {
+
+        // Regular expression for data
+        var re = /^record_/;
+        var data = {};
+
+        // We need to wrap the download function in a promise
+        function downloadPromise(pathname) { 
+            return new Promise(function(resolve, reject) { 
+                dbx.filesDownload({path:pathname}).then(function(response){
+                    return resolve(response);
+                }).catch(function(error){
+                    return reject(error)
+                })
+            });
+        }
+
+        // Get all current data files, and write to new database
+        dbx.filesListFolder({path: '/gileats'})
+        .then(function(response) {
+            var promises = [];
+            response.entries.forEach(function(e) {
+                // If we have a record, get it
+                if (re.test(e.name) == true) {
+
+                    // Retrieve the file and get a list of newRecords for data
+                    console.log(e.name);
+                    // TODO: STOPPED HERE : this looks like more info on the file
+                    // we need a path to DOWNLOAD it, OR when we make it we need to set metadata about the content inside
+                    promises.push(downloadPromise('/gileats/' + e.name))
+                }
+            })
+            console.log(promises);
+ 
+            // Now run all promises, don't move on until last operation is complete
+            Promise.all(promises).then(function(results) {
+                console.log(results);
+            }).catch(function(err) {
+                console.log(err);
+            });
+        })
+    
+    });
+
+}
+
+// Create the database
+function create_db(overwrite){
+
+    // create file, and return promise (continue down chain)
+    db = new File(["{}"], 'db.json' ,{type: 'text/json;charset=utf-8'});    
+    if (overwrite == 'overwrite') {
+        console.log('!!overwrite mode!!');
+        return dbx.filesUpload({path: '/gileats/' + db.name, contents: db, mode:'overwrite'})
+    } else {
+        return dbx.filesUpload({path: '/gileats/' + db.name, contents: db})
+    }
+}
+
 // Create a dropbox folder if it doesn't exist
-function createFolder(path,folder,access_token) {
+function createFolder(path,folder,access_token,overwrite) {
 
      path = path || ''
      folder = folder || 'gileats'
+     overwrite = overwrite || ''
 
      return new Promise((resolve, reject) => {
      
@@ -235,13 +306,16 @@ function createFolder(path,folder,access_token) {
 
             if (create_folder == true) {
 
-                // Create folder, and return promise (continue down chain)
-                return dbx.filesCreateFolder({path: '/' + folder})
+                // Create gileats folder
+                dbx.filesCreateFolder({path: '/' + folder})
+                .then(function(response){
+                    create_db(overwrite);
+                })
 
             } else {
 
                 // Folder is already created, return success
-                resolve(create_folder);
+                create_db(overwrite).then(resolve(create_folder))
             }
         })                
 
@@ -269,10 +343,87 @@ function get_map_data(url){
 }
 
 // Function to update the (file) database
-function update_db(url) {
+function update_db(url,newRecord) {
 
+    url = url || "https://dl.dropboxusercontent.com/s/m6fnsrc573duhyp/db.json?dl=0";
+    
     // TODO: check here if service worker has data cached
-    var promise = get_map_data(url);
+    var promise = get_map_data(url)
+    .then(function(data){
+
+        /* If we find the location ID, add to our object
+        {"652363240": {
+         "location": "37.3773871, -122.02961390000002",
+         "name":"Taco Bell..."
+         "records": [{
+            "id": "1593328582",
+            "image": "1593328582.png"
+         }, {
+            "id": "1593328582",
+            "image": "1593328582.png"
+         }]
+         },
+        ...
+        }
+        */
+        added = false;
+        record = {id:newRecord.id,
+                  image:newRecord.image}
+
+        $.each(data,function(location_id,e){
+            if (newRecord.location_id == location_id) {
+                data[location_id].records.push(record);
+                added = true;
+            }
+        });
+
+        // If the record wasn't added, the location_id isn't in the db
+        if (added == false) {
+            data[newRecord.location_id] = {"location": newRecord.location,
+                                           "name": newRecord.name,
+                                           "records":[record]}
+        }
+
+        // Save the result back to the database (use worker)
+        update_data(data,access_token)
+        .then(function(newdata){
+            console.log(newdata);
+        });
+                    // Does the url change?
+
+                    // THIS for saving data
+                    // https://advancedweb.hu/2016/08/09/parallel-processing-in-js/?utm_source=codropscollective  
+
+//pr.all for getting all jsons https://www.promisejs.org/patterns/
+
+                    // TODO: make service workers to perform these functions!
+                    // break functionality of update_map into different functions
+                    // use those functions here to get results, then update the results file
+                    // Finally, update the json file with the new entry
+                    /**
+	 * Create a new file with the contents provided in the request. Do not use this
+	 * to upload a file larger than 150 MB. Instead, create an upload session with
+	 * upload_session/start.
+	 * @function Dropbox#filesUpload
+	 * @arg {Object} arg - The request parameters.
+	 * @arg {Object} arg.contents - The file contents to be uploaded.
+	 * @arg {String} arg.path - Path in the user's Dropbox to save the file.
+	 * @arg {Object} arg.mode - Selects what to do if the file already exists.
+	 * @arg {Boolean} arg.autorename - If there's a conflict, as determined by mode,
+	 * have the Dropbox server try to autorename the file to avoid conflict.
+	 * @arg {Object|null} arg.client_modified - The value to store as the
+	 * client_modified timestamp. Dropbox automatically records the time at which
+	 * the file was written to the Dropbox servers. It can also record an additional
+	 * timestamp, provided by Dropbox desktop clients, mobile clients, and API apps
+	 * of when the file was actually created or modified.
+	 * @arg {Boolean} arg.mute - Normally, users are made aware of any file
+	 * modifications in their Dropbox account via notifications in the client
+	 * software. If true, this tells the clients that this modification shouldn't
+	 * result in a user notification.
+	 * @returns {Object}*/
+
+
+    });
 
 }
 
@@ -286,7 +437,6 @@ function update_map(url){
     // When the data is retrieved, add to map
     promise.then(function(data) {
 
-        console.log(data);
         // Add a marker for each data point
         // TODO: this should be done to render points only within viewable range, ok to start since number is tiny :)
 
@@ -326,6 +476,9 @@ function update_map(url){
 // Trigger that is called when user pushes button to upload file/record to dropbox
 function uploadFiles() {
 
+    // TODO: this should be retrieved programatically 
+
+    url = "https://dl.dropboxusercontent.com/s/m6fnsrc573duhyp/db.json?dl=0";
     var ACCESS_TOKEN = document.getElementById('access-token').value;
         
     // Create json record from form, required are an address and image file
@@ -346,7 +499,7 @@ function uploadFiles() {
         var image_file = fileInput.files[0];
         var filename = uid + "." + image_file.name.split('.').pop();
 
-        var record = {id:uid,
+        var newRecord = {id:uid,
                       location_id: loc.hashCode(),
                       image: filename,
                       name: address, 
@@ -355,7 +508,7 @@ function uploadFiles() {
                       rating: rating,
                       review: review};
 
-        var record = [JSON.stringify(record)];
+        var record = [JSON.stringify(newRecord)];
 
         // Connect to dropbox
         var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });            
@@ -378,52 +531,9 @@ function uploadFiles() {
                 console.error(error);
              });
 
-                    // Get current results
-
-                    // Add new result to it
- 
-                    // Save back to result (override)
-
-                    // Does the url change?
-
-                    // THIS for saving data
-                    // https://advancedweb.hu/2016/08/09/parallel-processing-in-js/?utm_source=codropscollective  
-
-//pr.all for getting all jsons https://www.promisejs.org/patterns/
-
-                    // TODO: make service workers to perform these functions!
-                    // break functionality of update_map into different functions
-                    // use those functions here to get results, then update the results file
-                    // Finally, update the json file with the new entry
-                    /**
-	 * Create a new file with the contents provided in the request. Do not use this
-	 * to upload a file larger than 150 MB. Instead, create an upload session with
-	 * upload_session/start.
-	 * @function Dropbox#filesUpload
-	 * @arg {Object} arg - The request parameters.
-	 * @arg {Object} arg.contents - The file contents to be uploaded.
-	 * @arg {String} arg.path - Path in the user's Dropbox to save the file.
-	 * @arg {Object} arg.mode - Selects what to do if the file already exists.
-	 * @arg {Boolean} arg.autorename - If there's a conflict, as determined by mode,
-	 * have the Dropbox server try to autorename the file to avoid conflict.
-	 * @arg {Object|null} arg.client_modified - The value to store as the
-	 * client_modified timestamp. Dropbox automatically records the time at which
-	 * the file was written to the Dropbox servers. It can also record an additional
-	 * timestamp, provided by Dropbox desktop clients, mobile clients, and API apps
-	 * of when the file was actually created or modified.
-	 * @arg {Boolean} arg.mute - Normally, users are made aware of any file
-	 * modifications in their Dropbox account via notifications in the client
-	 * software. If true, this tells the clients that this modification shouldn't
-	 * result in a user notification.
-	 * @returns {Object}
-	               
-
-
-
-                })
-                .catch(function(error) {
-                    console.error(error);
-                });*/
+             // Add new result to current result
+             console.log(newRecord);
+             update_db(url,newRecord)
 
         // If address and image not supplied, tell the user
         } else {
