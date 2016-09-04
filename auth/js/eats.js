@@ -487,26 +487,26 @@ function update_map(url){
             var lng = parseFloat(e.location.split(" ")[1]);
 
             // Each location has multiple records with different pictures
-            contentstring = "<div id='content'><h2>" + location_id + "</h2>"
-            $.each(e.records,function(i,e){
-                console.log("Parsing picture " + e + " here...");
+            contentstring = "<div id='content'><h2>" + e.name + "</h2>"
+            $.each(e.records,function(i,record){
+                console.log("Parsing picture " + record.image_url + " here...");
+                contentstring = contentstring + '<a href="'+ record.image_url+'" target="_blank"><img src="' + record.image_url +'" height="100px"></a>\n'
             });
+            contentstring = contentstring + '</div>'
             
             // Add all entries to the map as one point   
             var datum = new google.maps.Marker({ position: {lat: lat, lng: lng},
                                                  map: map.map,
-                                                 title: location_id // This should be the place name...
+                                                 title: e.name, // This should be the place name...
+                                                 content: contentstring
                                                });
 
             // Generate info window dynamically when point is clicked
             datum.addListener('click', function() {
-                console.log(this);
-                console.log(this.title);
-                var datafile = 'record_' + this.title + '.json'
-
+                
                 // TODO: this needs to have the full (static) url without needing authentication!
                 var infowindow = new google.maps.InfoWindow({
-                    content: "<h2>" + this.title + "</h2>"
+                    content: this.content
                 });
                 infowindow.open(map.map, this);
             })
