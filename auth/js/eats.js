@@ -406,15 +406,21 @@ function update_db(newRecords,url) {
          function generateRecordPromise(newRecord) { 
             return new Promise(function(resolve, reject) { 
 
-                getSharedLink('/gileats/' + newRecord.image,access_token).then(function(image_url){
-                    newRecord['image_url'] = image_url;                    
-                    resolve(newRecord);
-                }).catch(function(error){
-                    console.log(error);
+                return getSharedLink('/gileats/' + newRecord.image,access_token)
+                .then(function(image_url){
+                    newRecord['image_url'] = image_url;
+                    return getSharedLink('/gileats/record_' + newRecord.id + '.json',access_token)
+                    .then(function(record_url){
+                       newRecord['record_url'] = record_url;
+                       resolve(newRecord); 
+                    })
+                    .catch(function(error){
+                        console.log(error);
+                        reject(error);
+                    })
                 });
-
             });
-        }
+         }
 
          var promises = [];
          newRecords.forEach(function(e) {
@@ -432,7 +438,8 @@ function update_db(newRecords,url) {
                     // Generate a new record, a subset of information
                     var record = {id:newRecord.id,
                                   image:newRecord.image,
-                                  image_url:newRecord.image_url}
+                                  image_url:newRecord.image_url,
+                                  record_url:newRecord.record_url}
 
                     // Is the record in the current data?
                     var added = false;
