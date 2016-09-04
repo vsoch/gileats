@@ -195,8 +195,8 @@ function update_data(data,access_token) {
 
         path = "/gileats";
 
-        var dbx = new Dropbox({ accessToken: access_token });            
-        var content = [JSON.stringify(data)];
+        var dbx = new Dropbox({ accessToken: access_token });   
+        var content = [JSON.stringify(data,null,'\t')];
 
         update = new File(content, 'db.json', {type: 'text/json;charset=utf-8'});        
         dbx.filesUpload({path: path + '/' + update.name, 
