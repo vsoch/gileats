@@ -1,6 +1,11 @@
 /* ---------------------------
 Utils
 ----------------------------*/
+function getCookieToken(cookiename) {
+    cookiename = cookiename || 'gileats';
+    return $.cookie(cookiename);    
+}
+
 
 // Extend Strings to generate a unique hash code, will be used for image/record unique ids
 String.prototype.hashCode = function() {
@@ -20,7 +25,7 @@ Google Map Customization
 ----------------------------*/
 
 var map;
-
+var url; // Will be shared folder link
 var lat = 37.3861;
 var long = -122.0839;
 
@@ -187,6 +192,9 @@ function get_url(url) {
     });
 };
 
+/* ---------------------------
+Dropbox General Functions
+----------------------------*/
 
 // Download a file (json) from Dropbox
 function update_data(data,access_token) {
@@ -203,7 +211,6 @@ function update_data(data,access_token) {
                          contents: update,
                          mode:'overwrite'})
         .then(function(response) {
-            console.log(response);
             resolve(response);
         })
         .catch(function(error) {
@@ -211,6 +218,23 @@ function update_data(data,access_token) {
             resolve(error);
         });
     });
+};
+
+// Get a shared link for a particular path
+function getSharedLink(path,access_token) {
+
+    return new Promise(function(resolve,reject){
+
+        var dbx = new Dropbox({ accessToken: access_token });            
+        dbx.sharingCreateSharedLink({path:path}).then(function(response){
+            var sharedURL = response.url.replace('www.dropbox.com','dl.dropboxusercontent.com')
+            resolve(sharedURL);
+        }).catch(function(error){
+            console.log(error);
+            reject(error);
+        });
+    });
+
 };
 
 // Update entire database file (must be run manually)
@@ -239,37 +263,9 @@ function bigUpdate(access_token) {
                      reader.readAsText(response.fileBlob);
                 }).catch(function(error){
                     return reject(error)
-         // If path folder doesn't exist, create it
-         var create_folder = true;
-         dbx.filesListFolder({path: path})
-        .then(function(response) {
-            response.entries.forEach(function(e) {
-                if (e.name == folder) {
-                    create_folder = false;
-                }
-            })
-            return create_folder
-        })
-        .then(function(create_folder) {
-
-            if (create_folder == true) {
-
-                // Create gileats folder
-                dbx.filesCreateFolder({path: '/' + folder})
-                .then(function(response){
-                    create_db(overwrite);
-                })
-
-            } else {
-
-                // Folder is already created, return success
-                create_db(overwrite).then(resolve(create_folder))
-            }
-        })                
                 })
             });
         }
-
 
         // Get all current data files, and write to new database
         dbx.filesListFolder({path: '/gileats'})
@@ -278,7 +274,6 @@ function bigUpdate(access_token) {
             response.entries.forEach(function(e) {
                 // If we have a record, get it
                 if (re.test(e.name) == true) {
-
                     // Retrieve the file and get a list of newRecords for data
                     promises.push(downloadPromise('/gileats/' + e.name))
                 }
@@ -287,8 +282,8 @@ function bigUpdate(access_token) {
             // Now run all promises, don't move on until last operation is complete
             Promise.all(promises).then(function(results) {
 
-                // For each data object, write to new data file
-                update_db(results).then(function(newData){
+                 // For each data object, write to new data file
+                 update_db(results).then(function(newData){
                      console.log(newData);
                      // Save the result back to the database
                      update_data(newData,access_token);
@@ -390,7 +385,7 @@ Data General Functions
 ----------------------------*/
 
 function get_map_data(url){
-    url = url || "https://dl.dropboxusercontent.com/s/m6fnsrc573duhyp/db.json?dl=0";
+    url = url || getCookieToken('url') || "https://dl.dropboxusercontent.com/s/m6fnsrc573duhyp/db.json?dl=0";
     return get_url(url); // This is a promise
 }
 
@@ -402,39 +397,64 @@ function update_db(newRecords,url) {
         newRecords = [newRecords];
     }
 
-    url = url || "https://dl.dropboxusercontent.com/s/m6fnsrc573duhyp/db.json?dl=0";
+    url = url || getCookieToken('url');
     
-    // TODO: check here if service worker has data cached
     var promise = get_map_data(url)
     .then(function(data){
 
-      return new Promise(function(resolve,reject){
+         // Create a function to return promise to generate data
+         function generateRecordPromise(newRecord) { 
+            return new Promise(function(resolve, reject) { 
 
-            // Add each new record
-            $.each(newRecords,function(i,newRecord){
-                added = false;
-                record = {id:newRecord.id,
-                          image:newRecord.image}
-
-                $.each(data,function(location_id,e){
-                    if (newRecord.location_id == location_id) {
-                        data[location_id].records.push(record);
-                        added = true;
-                    }
+                getSharedLink('/gileats/' + newRecord.image,access_token).then(function(image_url){
+                    newRecord['image_url'] = image_url;                    
+                    resolve(newRecord);
+                }).catch(function(error){
+                    console.log(error);
                 });
 
-                // If the record wasn't added, the location_id isn't in the db
-                if (added == false) {
-                    data[newRecord.location_id] = {"location": newRecord.location,
-                                                   "name": newRecord.name,
-                                                   "records":[record]}
-                }
             });
+        }
 
-            //TODO: does the above likely needs to be done with promises?
-            resolve(data);
-    
-        });    
+         var promises = [];
+         newRecords.forEach(function(e) {
+             promises.push(generateRecordPromise(e))
+         })
+
+        // Now run all promises to generate array of data
+        return Promise.all(promises).then(function(newdata) {
+
+            return new Promise(function(resolve,reject){
+
+                // Add each new record
+                $.each(newdata,function(i,newRecord){
+
+                    // Generate a new record, a subset of information
+                    var record = {id:newRecord.id,
+                                  image:newRecord.image,
+                                  image_url:newRecord.image_url}
+
+                    // Is the record in the current data?
+                    var added = false;
+                    $.each(data,function(location_id,e){
+                        if (newRecord.location_id == location_id) {
+                            data[location_id].records.push(record);
+                            added = true;
+                        }
+                    });
+
+                    // If the record wasn't added, the location_id isn't in the db
+                    if (added == false) {
+
+                        data[newRecord.location_id] = {"location": newRecord.location,
+                                                       "name": newRecord.name,
+                                                       "records":[record]}
+                    }
+                });
+                resolve(data);
+            });    
+
+        });
     });
     return promise;
 }
@@ -475,6 +495,9 @@ function update_map(url){
             datum.addListener('click', function() {
                 console.log(this);
                 console.log(this.title);
+                var datafile = 'record_' + this.title + '.json'
+
+                // TODO: this needs to have the full (static) url without needing authentication!
                 var infowindow = new google.maps.InfoWindow({
                     content: "<h2>" + this.title + "</h2>"
                 });
@@ -488,11 +511,10 @@ function update_map(url){
 // Trigger that is called when user pushes button to upload file/record to dropbox
 function uploadFiles() {
 
-    // TODO: this should be retrieved programatically 
-
-    url = "https://dl.dropboxusercontent.com/s/m6fnsrc573duhyp/db.json?dl=0";
+    // Retrieve url and access token from fields
+    url = document.getElementById('url').value || getCookieToken('url');
     var ACCESS_TOKEN = document.getElementById('access-token').value;
-        
+
     // Create json record from form, required are an address and image file
     var address = document.getElementById('address-input').value;    // "Coho Data, Middlefield Road, Palo Alto, CA, United States"
     var fileInput = document.getElementById('file-upload');

@@ -97,6 +97,7 @@
 
                 <input type="textarea" placeholder="review" id="review"/>
                 <input type="hidden" id="access-token" placeholder="Access token" />
+                <input type="hidden" id="url" placeholder="url for database" />
                 <input type="file" id="file-upload" placeholder="picture"/>
                 <button type="submit">nomnom</button> 
 
@@ -135,8 +136,9 @@
      });
     }*/
     
-    function getCookieToken() {
-        return $.cookie('gileats');    
+    function getCookieToken(cookiename) {
+        cookiename = cookiename || 'gileats';
+        return $.cookie(cookiename);    
      }
 
     // Parses the url and gets the access token if it is in the urls hash
@@ -159,30 +161,27 @@
                createFolder('','gileats',access_token) // this is a promise
                .then(function(response) {
                    // Set the access_token in the gileats cookie
-                   $.cookie("gileats",access_token);
-               });
-            }
-        }
+                   $.cookie("gileats",access_token);              
+        
+                   // Get a shared link to the database
+                   getSharedLink('/gileats/db.json',access_token)
+                   .then(function(url){
+                       $.cookie("url",url);
+                   });
 
+
+                }); 
+         }
+       
        // At this point, if we haven't returned false, we can return the cookie that was set
        return getCookieToken();
+       }
     }
-
     // If the user was just redirected from authenticating, the urls hash will
     // contain the access token.
     function isAuthenticated() { 
         return !!getAccessToken();
     }
-
-    // Render a list of items to #files
-    function renderItems(items) {
-        var filesContainer = document.getElementById('files');
-        items.forEach(function(item) {
-            var li = document.createElement('li');
-            li.innerHTML = item.name;
-            filesContainer.appendChild(li);
-         });
-     }
 
     // This example keeps both the authenticate and non-authenticated setions
     // in the DOM and uses this function to show/hide the correct section.
@@ -200,21 +199,13 @@
         // Set the hidden field to be the authentication token
         var access_token = getAccessToken();
         document.getElementById('access-token').value = access_token; 
+        document.getElementById('url').value = getCookieToken('url'); 
 
         // Create an instance of Dropbox with the access token 
         var dbx = new Dropbox({ accessToken: access_token });
 
-        // fetch and render the files in the users root directory.
-        dbx.filesListFolder({path: '/gileats'})
-            .then(function(response) {
-                renderItems(response.entries);
-             })
-            .catch(function(error) {
-                console.error(error);
-             });
-
-        /* NOT AUTHENTICATED */
-        } else {
+    /* NOT AUTHENTICATED */
+    } else {
              
            showPageSection('pre-auth-section');
 
@@ -224,7 +215,7 @@
            var authUrl = dbx.getAuthenticationUrl('http://localhost:8080/auth');
            document.getElementById('authlink').href = authUrl;
 
-        }
+    }
 
     </script>
 </body>
