@@ -30,6 +30,16 @@ want to learn about how to organize / and write better code, JS feels unsatisfyi
 
 started with jquery,removed it
 
+write about pressing enter to change content,removing newline
+ function saveEdits() {
+        var editElem = document.getElementById("username");
+        var username = editElem.innerHTML.replaceAll('<br>','');
+        localStorage.userEdits = username;
+        editElem.innerHTML = username;
+    }
+    el = document.getElementById("username");
+    el.addEventListener("contentchange", saveEdits, false);
+
 want to play around withmoreobjectoriented code,and making customelements (extend HTMLElement)
 https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
 

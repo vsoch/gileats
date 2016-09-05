@@ -25,6 +25,11 @@ String.prototype.hashCode = function() {
     return Math.abs(hash);
 };
 
+// Extend strings to have replaceAll function
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
 
 /* ---------------------------
 Google Map Customization 

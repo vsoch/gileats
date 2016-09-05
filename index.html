@@ -134,8 +134,9 @@
     // Allow the user to change the name of the page
     function saveEdits() {
         var editElem = document.getElementById("username");
-        var username = editElem.innerHTML;
+        var username = editElem.innerHTML.replaceAll('<br>','');
         localStorage.userEdits = username;
+        editElem.innerHTML = username;
     }
     el = document.getElementById("username");
     el.addEventListener("contentchange", saveEdits, false);
