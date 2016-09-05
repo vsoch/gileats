@@ -117,8 +117,10 @@
   <script type="text/javascript" src="js/eats.js"></script>
 
   <script>
-
-
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+    // Not supported for mobile yet!
+    document.location = "mobile.html"
+  }
     /* Register a service worker for caching files
        Commented out for now so the cache isn't active 
     if ('serviceWorker' in navigator) {
