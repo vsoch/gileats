@@ -478,8 +478,6 @@ function update_map(url){
 
     var promise = get_map_data(url); // This is a promise
   
-    // TODO: update cache of data from url
-
     // When the data is retrieved, add to map
     promise.then(function(data) {
 
@@ -559,13 +557,13 @@ function uploadFiles() {
         var filename = uid + "." + image_file.name.split('.').pop();
 
         var newRecord = {id:uid,
-                      location_id: loc.hashCode(),
-                      image: filename,
-                      name: address, 
-                      location: loc, 
-                      date: datestr,
-                      rating: rating,
-                      review: review};
+                         location_id: loc.hashCode(),
+                         image: filename,
+                         name: address, 
+                         location: loc, 
+                         date: datestr,
+                         rating: rating,
+                         review: review};
 
         var record = [JSON.stringify(newRecord)];
 
