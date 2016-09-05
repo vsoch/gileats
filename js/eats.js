@@ -330,24 +330,12 @@ function createDB(access_token,overwrite) {
 
      return new Promise((resolve, reject) => {
      
-         // Create an instance of Dropbox with the access token 
-         var dbx = new Dropbox({ accessToken: access_token });
+        // Create an instance of Dropbox with the access token 
+        var dbx = new Dropbox({ accessToken: access_token });
 
         /* Create the database - the folder is created for us already in the "Apps" folder 
         of the user Dropbox, called "gileats" */
-        create_db(overwrite)
-
-        // Return success after folder creation
-       .then(function(response) {
-           resolve(response);
-        })
-
-        // Return fail if folder creation has error
-        .catch(function(error) {
-            console.error(error);
-            reject(error);
-        });
-       
+        create_db(overwrite)       
     });
 };
 
