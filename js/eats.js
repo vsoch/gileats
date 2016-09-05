@@ -25,7 +25,7 @@ Google Map Customization
 ----------------------------*/
 
 var map;
-var url = "https://dl.dropboxusercontent.com/s/9ymw0a4822nryj6/db.json?dl=0";
+var url;
 var lat = 37.3861;
 var long = -122.0839;
 
