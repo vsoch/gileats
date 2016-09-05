@@ -201,13 +201,11 @@ function update_data(data,access_token) {
  
     return new Promise((resolve, reject) => {
 
-        path = "/gileats";
-
         var dbx = new Dropbox({ accessToken: access_token });   
         var content = [JSON.stringify(data,null,'\t')];
 
         update = new File(content, 'db.json', {type: 'text/json;charset=utf-8'});        
-        dbx.filesUpload({path: path + '/' + update.name, 
+        dbx.filesUpload({path: update.name, 
                          contents: update,
                          mode:'overwrite'})
         .then(function(response) {
@@ -268,14 +266,14 @@ function bigUpdate(access_token) {
         }
 
         // Get all current data files, and write to new database
-        dbx.filesListFolder({path: '/gileats'})
+        dbx.filesListFolder({path: ''})
         .then(function(response) {
             var promises = [];
             response.entries.forEach(function(e) {
                 // If we have a record, get it
                 if (re.test(e.name) == true) {
                     // Retrieve the file and get a list of newRecords for data
-                    promises.push(downloadPromise('/gileats/' + e.name))
+                    promises.push(downloadPromise(e.name))
                 }
             })
  
@@ -302,7 +300,7 @@ function create_db(overwrite){
     db = new File(["{}"], 'db.json' ,{type: 'text/json;charset=utf-8'});    
     if (overwrite == 'overwrite') {
         console.log('!!overwrite mode!!');
-        return dbx.filesUpload({path: '/gileats/' + db.name, contents: db, mode:'overwrite'})
+        return dbx.filesUpload({path: db.name, contents: db, mode:'overwrite'})
     } else {
         
         // Only create db if not there.
@@ -379,10 +377,10 @@ function update_db(newRecords,url) {
          function generateRecordPromise(newRecord) { 
             return new Promise(function(resolve, reject) { 
 
-                return getSharedLink('/gileats/' + newRecord.image,access_token)
+                return getSharedLink(newRecord.image,access_token)
                 .then(function(image_url){
                     newRecord['image_url'] = image_url;
-                    return getSharedLink('/gileats/record_' + newRecord.id + '.json',access_token)
+                    return getSharedLink('record_' + newRecord.id + '.json',access_token)
                     .then(function(record_url){
                        newRecord['record_url'] = record_url;
                        resolve(newRecord); 
@@ -544,10 +542,10 @@ function uploadFiles() {
         // Connect to dropbox
         var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });            
         file = new File(record, 'record_' + uid + '.json' ,{type: 'text/json;charset=utf-8'});        
-        dbx.filesUpload({path: '/gileats/' + file.name, contents: file})
+        dbx.filesUpload({path: file.name, contents: file})
   
             // Upload individual record file
-            .then(dbx.filesUpload({path: '/gileats/' + filename, contents: image_file}))
+            .then(dbx.filesUpload({path: filename, contents: image_file}))
             .catch(function(error) {
                 console.error(error);
             })
