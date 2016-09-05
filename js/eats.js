@@ -243,7 +243,7 @@ function bigUpdate(access_token) {
     var dbx = new Dropbox({ accessToken: access_token });            
         
     // Create gileats folder, but overwrite old database
-    createFolder('','gileats',access_token,'overwrite') // this is a promise
+    createDB(access_token,'overwrite') // this is a promise
     .then(function(response) {
 
         // Regular expression for data
@@ -303,12 +303,11 @@ function create_db(overwrite){
     if (overwrite == 'overwrite') {
         console.log('!!overwrite mode!!');
         return dbx.filesUpload({path: '/gileats/' + db.name, contents: db, mode:'overwrite'})
-
     } else {
         
         // Only create db if not there.
         var db_exists = true;
-        dbx.filesListFolder({path: '/gileats/'})
+        dbx.filesListFolder({path: ''})
         .then(function(response) {
             response.entries.forEach(function(e) {
                 if (e.name == 'db.json') {
@@ -319,18 +318,16 @@ function create_db(overwrite){
         })
         .then(function(db_exists) {
             if (db_exists == true) {
-                return dbx.filesUpload({path: '/gileats/' + db.name, contents: db})
+                return dbx.filesUpload({path: '' + db.name, contents: db})
             }
             return Promise.resolve();
         })                
     }
 }
 
-// Create a dropbox folder if it doesn't exist
-function createFolder(path,folder,access_token,overwrite) {
+// Create the db file if it doesn't exist
+function createDB(access_token,overwrite) {
 
-     path = path || ''
-     folder = folder || 'gileats'
      overwrite = overwrite || ''
 
      return new Promise((resolve, reject) => {
@@ -338,33 +335,9 @@ function createFolder(path,folder,access_token,overwrite) {
          // Create an instance of Dropbox with the access token 
          var dbx = new Dropbox({ accessToken: access_token });
 
-         // If path folder doesn't exist, create it
-         var create_folder = true;
-         dbx.filesListFolder({path: path})
-        .then(function(response) {
-            response.entries.forEach(function(e) {
-                if (e.name == folder) {
-                    create_folder = false;
-                }
-            })
-            return create_folder
-        })
-        .then(function(create_folder) {
-
-            if (create_folder == true) {
-
-                // Create gileats folder
-                dbx.filesCreateFolder({path: '/' + folder})
-                .then(function(response){
-                    create_db(overwrite);
-                })
-
-            } else {
-
-                // Folder is already created, return success
-                create_db(overwrite)
-            }
-        })                
+        /* Create the database - the folder is created for us already in the "Apps" folder 
+        of the user Dropbox, called "gileats" */
+        create_db(overwrite)
 
         // Return success after folder creation
        .then(function(response) {

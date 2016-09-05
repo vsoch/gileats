@@ -16,6 +16,7 @@ Dropbox has a [nice API](https://dropbox.github.io/dropbox-api-v2-explorer) that
 
 
 **under development**
+GoogleNative Client to run code natively in browser https://developer.chrome.com/native-client/overview
 
 - checks to do before upload (do we have an address? an image file?)
 - first wanting to have individual files, realizing I can only get one file statically, and then I would need to keep data in one file, worrying about losing data / feasible to store in one, deciding on solution to keep records individually and update some master file when a new entry is made. Could be errors if the operation is closed when the file is being written, but then it will be re-generated next time an entry is made (and no data is lost)
@@ -24,3 +25,12 @@ Dropbox has a [nice API](https://dropbox.github.io/dropbox-api-v2-explorer) that
 TODO: master db file will somehow need to have reliable link, because it has to be embedded in page. Other files need to be added, and made public,and link saved dynamically for retrieving later. Otherwise, the entire thing has to be static (after user authenticates).
 
 A common bug: when you have a worker running via  a promise, the promise will only be resolved if you posta message back. I forgot to do this and was getting pending promise returned, not sure why.
+
+want to learn about how to organize / and write better code, JS feels unsatisfying in way must be organized,etc. "Now the goal is to split the big function into smaller, independent and reusable ones. " I need to also learn how to write funciton tests for JS.
+
+started with jquery,removed it
+
+want to play around withmoreobjectoriented code,and making customelements (extend HTMLElement)
+https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+
+http://www.html5rocks.com/en/tutorials/internals/howbrowserswork/#Generating_parsers_automatically

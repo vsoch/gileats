@@ -143,7 +143,10 @@
            // If we do, the user has authenticated but it's not set yet as a cookie
            var access_token = utils.parseQueryString(window.location.hash).access_token;
 
-           // If gileats folder doesn't exist, create it
+           // Check to make sure db is created, but don't overwrite
+           createDB(access_token);
+
+           // Set the token in the browser
            $.cookie("gileats",access_token);              
         
            // Get a shared link to the database, let's limit to Gil for now
