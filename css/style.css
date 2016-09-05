@@ -65,12 +65,10 @@ input {
   text-decoration: none;
 }
 .page-header nav {
-  display: flex;
   justify-content: space-between;
   align-items: center;
 }
 .page-header h1 {
-  display: flex;
   align-items: center;
   color: #fff;
   font-size: 17px;
