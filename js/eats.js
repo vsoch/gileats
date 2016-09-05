@@ -266,7 +266,7 @@ function bigUpdate(access_token) {
         }
 
         // Get all current data files, and write to new database
-        dbx.filesListFolder({path: ''})
+        dbx.filesListFolder({path: '/'})
         .then(function(response) {
             var promises = [];
             response.entries.forEach(function(e) {
