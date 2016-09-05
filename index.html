@@ -8,6 +8,8 @@
     <script src="js/Dropbox-sdk.min.js"></script>
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <script src="js/utils.js"></script>
+    <script src="js/flatpickr.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/flatpickr.css">
     <link rel="icon" href="favicon.ico">
 </head>
 <body>
@@ -45,7 +47,7 @@
                 <!-- Restaurant and location search-->
                 <input id="address-input" class="controls" type="text" placeholder="Enter a location">
                 <input type="hidden" placeholder="location" id="location"/>
-                <input type="text" placeholder="date" id="date"/>
+                <input class="flatpickr" id="date" data-date-format="m-d-Y"/>
 
                 <!--Interactive Stars!-->
                 <fieldset class="form-group">
@@ -165,7 +167,10 @@
     if (isAuthenticated()) {
 
         // Fill in the date field
-        document.getElementById('date').value = Date();
+        document.getElementById("date").flatpickr();
+        var d = new Date()
+        var date = d.getMonth() + '-' + d.getDate() +'-' + d.getFullYear();
+        document.getElementById('date').value = date;
         
         showPageSection('authed-section');
 
