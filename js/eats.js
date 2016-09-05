@@ -308,6 +308,8 @@ function create_db(overwrite){
              console.log(sharedURL);
              resolve(sharedURL);
              })
+        })
+
     } else {
         
         // Only create db if not there.
@@ -331,6 +333,7 @@ function create_db(overwrite){
                     console.log(sharedURL);
                     resolve(sharedURL);
                 })
+              })
             }
             return Promise.resolve();
         })                
