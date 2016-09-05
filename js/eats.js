@@ -225,6 +225,7 @@ function getSharedLink(path,access_token) {
 
         var dbx = new Dropbox({ accessToken: access_token });            
         dbx.sharingCreateSharedLink({path: '/' + path}).then(function(response){
+            console.log(path);
             var sharedURL = response.url.replace('www.dropbox.com','dl.dropboxusercontent.com')
             resolve(sharedURL);
         }).catch(function(error){
@@ -302,7 +303,7 @@ function create_db(overwrite){
         console.log('!!overwrite mode!!');
         return dbx.filesUpload({path: '/' + db.name, contents: db, mode:'overwrite'})
        .then(function(response){
-             getSharedLink(db.name,access_token).then(function(sharedURL){
+             return getSharedLink(db.name,access_token).then(function(sharedURL){
              $.cookie('url',sharedURL);
              url = sharedURL;
              console.log(sharedURL);
@@ -327,7 +328,7 @@ function create_db(overwrite){
             if (db_exists == false) {
                 return dbx.filesUpload({path: '/' + db.name, contents: db})
                 .then(function(response) {
-                    getSharedLink(db.name,access_token).then(function(sharedURL){
+                    return getSharedLink(db.name,access_token).then(function(sharedURL){
                     $.cookie('url',sharedURL);
                     url = sharedURL;
                     console.log(sharedURL);
