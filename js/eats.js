@@ -533,7 +533,7 @@ function uploadFiles() {
         dbx.filesUpload({path: '/' + file.name, contents: file})
   
             // Upload individual record file
-            .then(dbx.filesUpload({path: filename, contents: image_file}))
+            .then(dbx.filesUpload({path: '/' + filename, contents: image_file}))
             .catch(function(error) {
                 console.error(error);
             })
