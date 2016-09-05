@@ -5,7 +5,11 @@ function getCookieToken(cookiename) {
     cookiename = cookiename || 'gileats';
     var value = "; " + document.cookie;
     var parts = value.split("; " + cookiename + "=");
-    if (parts.length == 2) return parts.pop().split(";").shift();
+    if (parts.length == 2) {
+        return decodeURIComponent(parts.pop().split(";").shift());
+    } else {
+        return "";
+    }
 }
 
 
