@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css?family=Indie+Flower" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
+    <script src="js/Dropbox-sdk.min.js"></script>
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <script src="js/utils.js"></script>
 </head>
@@ -16,7 +16,7 @@
         <div class="container">
             <nav>
                 <a href="https://vsoch.github.io/gileats">
-                    <span style="position:absolute; margin-left:500px" class="code">Gil Eats</span></a>
+                    <span style="position:absolute; margin-left:500px" class="code">Gil Eats</span>
                     <img src="img/gil.png" class="logo" />
                 </a>
             </nav>
@@ -136,15 +136,18 @@
 
     // Parses the url and gets the access token if it is in the urls hash
     function getAccessToken() {
+
         // First check to see if we have a cookie token
-        if (!!getCookieToken()) {
+        if (!getCookieToken()) {
 
             // Does the url have a token?
             var has_token = !!utils.parseQueryString(window.location.hash).access_token;
             
             // If we don't have a token, return False so the user authenticates
             if (!has_token) {
+
                 return has_token;
+
             } else {
 
                // If we do, the user has authenticated but it's not set yet as a cookie
