@@ -301,6 +301,13 @@ function create_db(overwrite){
     if (overwrite == 'overwrite') {
         console.log('!!overwrite mode!!');
         return dbx.filesUpload({path: '/' + db.name, contents: db, mode:'overwrite'})
+       .then(function(response){
+             getSharedLink(db.name,access_token).then(function(sharedURL){
+             $.cookie('url',sharedURL);
+             url = sharedURL;
+             console.log(sharedURL);
+             resolve(sharedURL);
+             })
     } else {
         
         // Only create db if not there.
@@ -317,6 +324,13 @@ function create_db(overwrite){
         .then(function(db_exists) {
             if (db_exists == false) {
                 return dbx.filesUpload({path: '/' + db.name, contents: db})
+                .then(function(response) {
+                    getSharedLink(db.name,access_token).then(function(sharedURL){
+                    $.cookie('url',sharedURL);
+                    url = sharedURL;
+                    console.log(sharedURL);
+                    resolve(sharedURL);
+                })
             }
             return Promise.resolve();
         })                
