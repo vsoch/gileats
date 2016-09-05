@@ -425,7 +425,7 @@ function update_db(newRecords,url) {
                         var added = false;
                   
                         for (var location_id in data) {
-                            if (data.hasOwnProperty(location_id) {
+                            if (data.hasOwnProperty(location_id)) {
                                 var e = data[location_id];
 
                                 if (newRecord.location_id == location_id) {
