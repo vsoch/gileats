@@ -143,9 +143,6 @@
            // If we do, the user has authenticated but it's not set yet as a cookie
            var access_token = utils.parseQueryString(window.location.hash).access_token;
 
-           // Check to make sure db is created, but don't overwrite
-           createDB(access_token);
-
            // Set the token in the browser
            $.cookie("gileats",access_token);              
         
@@ -184,6 +181,10 @@
 
         // Create an instance of Dropbox with the access token 
         var dbx = new Dropbox({ accessToken: access_token });
+
+        // Check to make sure db is created, but don't overwrite
+        createDB(access_token);
+
 
     /* NOT AUTHENTICATED */
     } else {
