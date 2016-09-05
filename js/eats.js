@@ -224,7 +224,7 @@ function update_data(data,access_token) {
         })
         .catch(function(error) {
             console.error(error);
-            resolve(error);
+            reject(error);
         });
     });
 };
