@@ -137,37 +137,23 @@
     // Parses the url and gets the access token if it is in the urls hash
     function getAccessToken() {
 
-        // First check to see if we have a cookie token
-        if (!getCookieToken()) {
+           // If we do, the user has authenticated but it's not set yet as a cookie
+           var access_token = utils.parseQueryString(window.location.hash).access_token;
 
-            // Does the url have a token?
-            var has_token = !!utils.parseQueryString(window.location.hash).access_token;
-            
-            // If we don't have a token, return False so the user authenticates
-            if (!has_token) {
-                return has_token;
-            } else {
-
-               // If we do, the user has authenticated but it's not set yet as a cookie
-               var access_token = utils.parseQueryString(window.location.hash).access_token;
-
-               // If gileats folder doesn't exist, create it
-               createFolder('','gileats',access_token) // this is a promise
-               .then(function(response) {
-                   // Set the access_token in the gileats cookie
-                   $.cookie("gileats",access_token);              
+           // If gileats folder doesn't exist, create it
+           createFolder('','gileats',access_token,'') // this is a promise
+           .then(function(response) {
+               // Set the access_token in the gileats cookie
+               $.cookie("gileats",access_token);              
         
-                   // Get a shared link to the database
-                   getSharedLink('/gileats/db.json',access_token)
-                   .then(function(url){
+               // Get a shared link to the database
+               getSharedLink('/gileats/db.json',access_token)
+                  .then(function(url){
                        $.cookie("url",url);
                    });
-                }); 
+               }); 
 
-             }
-       }
-         // At this point, if we haven't returned false, we can return the cookie that was set
-         return getCookieToken();
+           return access_token;
     }
 
     // If the user was just redirected from authenticating, the urls hash will

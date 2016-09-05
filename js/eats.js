@@ -385,7 +385,7 @@ Data General Functions
 ----------------------------*/
 
 function get_map_data(url){
-    url = url || getCookieToken('url') || "https://dl.dropboxusercontent.com/s/m6fnsrc573duhyp/db.json?dl=0";
+    url = url || getCookieToken('url') || "https://dl.dropboxusercontent.com/s/0a0ik93o3u3pfsv/db.json?dl=0";
     return get_url(url); // This is a promise
 }
 
