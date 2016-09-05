@@ -3,7 +3,9 @@ Utils
 ----------------------------*/
 function getCookieToken(cookiename) {
     cookiename = cookiename || 'gileats';
-    return $.cookie(cookiename);    
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + cookiename + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
 
@@ -102,7 +104,7 @@ map.addStyle({
 map.setStyle("map_style");
 
 // Start the lat and long at the current location
-$("#location").val(lat +", "+ long);
+document.getElementById("location").value = lat +", "+ long;
 
 // Add event listener to fire a function when the marker is moved
 gil.addListener('dragend', function(evt) {
@@ -152,8 +154,8 @@ autocomplete.addListener('place_changed', function() {
     var lat = place.geometry.location.lat();
     var long = place.geometry.location.lng();
     var location = lat + ", " + long;
-    $("#location").val(location);
-
+    document.getElementById("location").value = location;
+    
     marker.setPosition(place.geometry.location);
     marker.setVisible(true);
 
@@ -302,7 +304,7 @@ function create_db(overwrite){
         return dbx.filesUpload({path: '/' + db.name, contents: db, mode:'overwrite'})
        .then(function(response){
              return getSharedLink(db.name,access_token).then(function(sharedURL){
-             $.cookie('url',sharedURL);
+             document.cookie = "url=" + sharedURL;
              url = sharedURL;
              resolve(sharedURL);
              })
@@ -326,7 +328,7 @@ function create_db(overwrite){
                 return dbx.filesUpload({path: '/' + db.name, contents: db})
                 .then(function(response) {
                     return getSharedLink(db.name,access_token).then(function(sharedURL){
-                    $.cookie('url',sharedURL);
+                    document.cookie = "url=" + sharedURL;
                     url = sharedURL;
                     resolve(sharedURL);
                 })
@@ -349,7 +351,7 @@ function createDB(access_token,overwrite) {
 
         /* Create the database - the folder is created for us already in the "Apps" folder 
         of the user Dropbox, called "gileats" */
-        create_db(overwrite)       
+        create_db(overwrite)    
     });
 };
 
@@ -406,36 +408,43 @@ function update_db(newRecords,url) {
             return new Promise(function(resolve,reject){
 
                 // Add each new record
-                $.each(newdata,function(i,newRecord){
+                for (var i in newdata) {
+                    if (newdata.hasOwnProperty(i)) {
+ 
+                        var newRecord = newdata[i];
 
-                    // Generate a new record, a subset of information
-                    var record = {id:newRecord.id,
-                                  image:newRecord.image,
-                                  image_url:newRecord.image_url,
-                                  record_url:newRecord.record_url,
-                                  review:newRecord.review,
-                                  rating:newRecord.rating}
+                        // Generate a new record, a subset of information
+                        var record = {id:newRecord.id,
+                                      image:newRecord.image,
+                                      image_url:newRecord.image_url,
+                                      record_url:newRecord.record_url,
+                                      review:newRecord.review,
+                                      rating:newRecord.rating}
 
-                    // Is the record in the current data?
-                    var added = false;
-                    $.each(data,function(location_id,e){
-                        if (newRecord.location_id == location_id) {
-                            data[location_id].records.push(record);
-                            added = true;
+                        // Is the record in the current data?
+                        var added = false;
+                  
+                        for (var location_id in data) {
+                            if (data.hasOwnProperty(location_id) {
+                                var e = data[location_id];
+
+                                if (newRecord.location_id == location_id) {
+                                    data[location_id].records.push(record);
+                                    added = true;
+                                }
+                             }
                         }
-                    });
 
-                    // If the record wasn't added, the location_id isn't in the db
-                    if (added == false) {
+                        // If the record wasn't added, the location_id isn't in the db
+                        if (added == false) {
 
-                        data[newRecord.location_id] = {"location": newRecord.location,
-                                                       "name": newRecord.name,
-                                                       "records":[record]}
+                            data[newRecord.location_id] = {"location": newRecord.location,
+                                                           "name": newRecord.name,
+                                                           "records":[record]}
+                        }
                     }
-                });
+                }
                 resolve(data);
-            });    
-
         });
     });
     return promise;
@@ -468,39 +477,46 @@ function update_map(url){
         // TODO: this should be done to render points only within viewable range, ok to start since number is tiny :)
 
         // Here we are adding the listener for each food stop
-        $.each(data,function(location_id,e){
+        for (var location_id in data) {
+            if (data.hasOwnProperty(location_id)) {
+                var e = data[location_id]
 
-            // Parse latitude and longitude from "location"
-            var lat = parseFloat(e.location.split(" ")[0].replace(",",""));
-            var lng = parseFloat(e.location.split(" ")[1]);
+                // Parse latitude and longitude from "location"
+                var lat = parseFloat(e.location.split(" ")[0].replace(",",""));
+                var lng = parseFloat(e.location.split(" ")[1]);
 
-            // Each location has multiple records with different pictures
-            contentstring = "<h2>" + e.name + "</h2><div class='gallery'>"
-            $.each(e.records,function(i,record){
-                var image_caption = "<strong>Review:</strong> " + record.review + "<br><strong>Rating:</strong> " + record.rating + "/5 stars";
-                contentstring = contentstring + '<a data-caption="' + image_caption +'" id="record_' + record.id + '" href="'+ record.image_url +'"><img src="' + record.image_url +'" height="100px"></a>\n'
-            });
-            contentstring = contentstring + '</div>'
+                // Each location has multiple records with different pictures
+                contentstring = "<h2>" + e.name + "</h2><div class='gallery'>"
+        
+                for (var i in e.records) {
+                    if (e.records.hasOwnProperty(i)) {
+                        var record = e.records[i];
+                        var image_caption = "<strong>Review:</strong> " + record.review + "<br><strong>Rating:</strong> " + record.rating + "/5 stars";
+                        contentstring = contentstring + '<a data-caption="' + image_caption +'" id="record_' + record.id + '" href="'+ record.image_url +'"><img src="' + record.image_url +'" height="100px"></a>\n'
+                    }
+                }
+                contentstring = contentstring + '</div>'
             
-            // Add all entries to the map as one point   
-            var datum = new google.maps.Marker({ position: {lat: lat, lng: lng},
-                                                 map: map.map,
-                                                 title: e.name, // This should be the place name...
-                                                 content: contentstring
-                                               });
+                // Add all entries to the map as one point   
+                var datum = new google.maps.Marker({ position: {lat: lat, lng: lng},
+                                                     map: map.map,
+                                                     title: e.name, // This should be the place name...
+                                                     content: contentstring
+                                                   });
 
-            // Generate info window dynamically when point is clicked
-            datum.addListener('click', function() {
+                // Generate info window dynamically when point is clicked
+                datum.addListener('click', function() {
                 
-                var infowindow = new google.maps.InfoWindow({
-                    content: this.content
-                });
+                    var infowindow = new google.maps.InfoWindow({
+                        content: this.content
+                    });
 
-                // Initialize the image lightbox
-                infowindow.open(map.map, this);
-                baguetteBox.run('.gallery')
-            })
-        });
+                    // Initialize the image lightbox
+                    infowindow.open(map.map, this);
+                    baguetteBox.run('.gallery')
+                })
+              }
+            }
     
     });
 }
@@ -520,7 +536,9 @@ function uploadFiles() {
     if ((address != "") && (fileInput.files.length > 0)) {
         var loc = document.getElementById('location').value              // "37.417157, -122.10435719999998"
         var datestr = document.getElementById('date').value
-        var rating = $("input[name='rating']:checked"). val();
+
+        var rating = document.querySelector("input[name='rating']:checked").value;
+
         var review = document.getElementById('review').value
 
         // Create uid for the entry

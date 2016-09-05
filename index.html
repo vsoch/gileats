@@ -149,10 +149,13 @@
         document.getElementById("username").innerHTML = localStorage.userEdits;
     }
 
+    // Function to get a cookie by its name
     function getCookieToken(cookiename) {
         cookiename = cookiename || 'gileats';
-        return $.cookie(cookiename);    
-     }
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + cookiename + "=");
+        if (parts.length == 2) return parts.pop().split(";").shift();
+    }
 
     // Parses the url and gets the access token if it is in the urls hash
     function getAccessToken() {
@@ -161,11 +164,8 @@
            var access_token = utils.parseQueryString(window.location.hash).access_token;
 
            // Set the token in the browser
-           $.cookie("gileats",access_token);              
-        
-           // Get a shared link to the database, let's limit to Gil for now
-           $.cookie("url",url);
-           
+           document.cookie = "gileats=" + access_token;
+                   
            return access_token;
     }
 
