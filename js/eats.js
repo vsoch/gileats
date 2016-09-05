@@ -224,7 +224,7 @@ function getSharedLink(path,access_token) {
     return new Promise(function(resolve,reject){
 
         var dbx = new Dropbox({ accessToken: access_token });            
-        dbx.sharingCreateSharedLink({path: path}).then(function(response){
+        dbx.sharingCreateSharedLink({path: '/' + path}).then(function(response){
             var sharedURL = response.url.replace('www.dropbox.com','dl.dropboxusercontent.com')
             resolve(sharedURL);
         }).catch(function(error){
@@ -368,7 +368,7 @@ function update_db(newRecords,url) {
                 return getSharedLink(newRecord.image,access_token)
                 .then(function(image_url){
                     newRecord['image_url'] = image_url;
-                    return getSharedLink('/record_' + newRecord.id + '.json',access_token)
+                    return getSharedLink('record_' + newRecord.id + '.json',access_token)
                     .then(function(record_url){
                        newRecord['record_url'] = record_url;
                        resolve(newRecord); 
