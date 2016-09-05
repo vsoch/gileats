@@ -25,7 +25,7 @@ Google Map Customization
 ----------------------------*/
 
 var map;
-var url; // Will be shared folder link
+var url = "https://dl.dropboxusercontent.com/s/0em1erbgdjbom93/db.json?dl=0";
 var lat = 37.3861;
 var long = -122.0839;
 

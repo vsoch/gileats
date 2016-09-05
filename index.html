@@ -141,18 +141,11 @@
            var access_token = utils.parseQueryString(window.location.hash).access_token;
 
            // If gileats folder doesn't exist, create it
-           createFolder('','gileats',access_token,'') // this is a promise
-           .then(function(response) {
-               // Set the access_token in the gileats cookie
-               $.cookie("gileats",access_token);              
+           $.cookie("gileats",access_token);              
         
-               // Get a shared link to the database
-               getSharedLink('/gileats/db.json',access_token)
-                  .then(function(url){
-                       $.cookie("url",url);
-                   });
-               }); 
-
+           // Get a shared link to the database, let's limit to Gil for now
+           $.cookie("url",url);
+           
            return access_token;
     }
 
