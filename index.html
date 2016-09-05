@@ -8,8 +8,8 @@
     <script src="js/Dropbox-sdk.min.js"></script>
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <script src="js/utils.js"></script>
-    <script src="js/flatpickr.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/flatpickr.css">
+    <script src="js/flatpickr.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/flatpickr.min.css">
     <link rel="icon" href="favicon.ico">
 </head>
 <body>
@@ -192,7 +192,7 @@
            and the associated URL must be: 
            var authUrl = dbx.getAuthenticationUrl('http://localhost:8080/auth'); */
            
-           var CLIENT_ID = '4mndf9u8d1ww3fz';
+           var CLIENT_ID = 'uxss1dt1pndweb8';
            var dbx = new Dropbox({ clientId: CLIENT_ID });
            var authUrl = dbx.getAuthenticationUrl('https://vsoch.github.io/gileats');
            document.getElementById('authlink').href = authUrl;
