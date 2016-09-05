@@ -145,9 +145,7 @@
             
             // If we don't have a token, return False so the user authenticates
             if (!has_token) {
-
                 return has_token;
-
             } else {
 
                // If we do, the user has authenticated but it's not set yet as a cookie
@@ -164,14 +162,12 @@
                    .then(function(url){
                        $.cookie("url",url);
                    });
-
-
                 }); 
-         }
-       
-       // At this point, if we haven't returned false, we can return the cookie that was set
-       return getCookieToken();
+
+             }
        }
+         // At this point, if we haven't returned false, we can return the cookie that was set
+         return getCookieToken();
     }
 
     // If the user was just redirected from authenticating, the urls hash will
