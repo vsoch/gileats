@@ -581,6 +581,4 @@ function uploadFiles() {
         return false
     }
 
-
-// call update_map the first time
 update_map();

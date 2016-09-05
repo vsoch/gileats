@@ -117,8 +117,9 @@
   <script type="text/javascript" src="js/eats.js"></script>
 
   <script>
+
+  // Not supported for mobile yet!
   if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
-    // Not supported for mobile yet!
     document.location = "mobile.html"
   }
     /* Register a service worker for caching files
@@ -139,6 +140,13 @@
         var editElem = document.getElementById("username");
         var username = editElem.innerHTML;
         localStorage.userEdits = username;
+    }
+    el = document.getElementById("username");
+    el.addEventListener("contentchange", saveEdits, false);
+
+    // If the name is in storage, retrieve it
+    if ('userEdits' in localStorage){
+        document.getElementById("username").innerHTML = localStorage.userEdits;
     }
 
     function getCookieToken(cookiename) {
@@ -193,7 +201,7 @@
 
         // Check to make sure db is created, but don't overwrite
         createDB(access_token);
-
+        update_map();
 
     /* NOT AUTHENTICATED */
     } else {
