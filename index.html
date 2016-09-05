@@ -18,8 +18,9 @@
     <header class="page-header">
         <div class="container">
             <nav>
-                <a href="https://vsoch.github.io/gileats">
-                    <span style="position:absolute; margin-left:500px" class="code">Gil Eats</span>
+                    <span style="position:absolute; margin-left:500px" class="code">
+                        <a href="#" onclick="saveEdits()"><span id="username" contenteditable="true">Gil</span></a> 
+                        <a href="https://vsoch.github.io/gileats">Eats</span>
                     <img src="img/gil.png" class="logo" />
                 </a>
             </nav>
@@ -134,6 +135,13 @@
      });
     }*/
     
+    // Allow the user to change the name of the page
+    function saveEdits() {
+        var editElem = document.getElementById("username");
+        var username = editElem.innerHTML;
+        localStorage.userEdits = username;
+    }
+
     function getCookieToken(cookiename) {
         cookiename = cookiename || 'gileats';
         return $.cookie(cookiename);    
