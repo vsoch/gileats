@@ -234,7 +234,8 @@ function getSharedLink(path,access_token) {
 
     return new Promise(function(resolve,reject){
 
-        var dbx = new Dropbox({ accessToken: access_token });            
+        var dbx = new Dropbox({ accessToken: access_token });     
+        console.log("ADDING SHARED LINK WITH PATH: " + path);       
         dbx.sharingCreateSharedLink({path: '/' + path}).then(function(response){
             var sharedURL = response.url.replace('www.dropbox.com','dl.dropboxusercontent.com')
             resolve(sharedURL);
