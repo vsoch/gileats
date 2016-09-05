@@ -205,7 +205,7 @@ function update_data(data,access_token) {
         var content = [JSON.stringify(data,null,'\t')];
 
         update = new File(content, 'db.json', {type: 'text/json;charset=utf-8'});        
-        dbx.filesUpload({path: update.name, 
+        dbx.filesUpload({path: '/' + update.name, 
                          contents: update,
                          mode:'overwrite'})
         .then(function(response) {
@@ -224,7 +224,7 @@ function getSharedLink(path,access_token) {
     return new Promise(function(resolve,reject){
 
         var dbx = new Dropbox({ accessToken: access_token });            
-        dbx.sharingCreateSharedLink({path:path}).then(function(response){
+        dbx.sharingCreateSharedLink({path: path}).then(function(response){
             var sharedURL = response.url.replace('www.dropbox.com','dl.dropboxusercontent.com')
             resolve(sharedURL);
         }).catch(function(error){
@@ -300,23 +300,23 @@ function create_db(overwrite){
     db = new File(["{}"], 'db.json' ,{type: 'text/json;charset=utf-8'});    
     if (overwrite == 'overwrite') {
         console.log('!!overwrite mode!!');
-        return dbx.filesUpload({path: db.name, contents: db, mode:'overwrite'})
+        return dbx.filesUpload({path: '/' + db.name, contents: db, mode:'overwrite'})
     } else {
         
         // Only create db if not there.
-        var db_exists = true;
+        var db_exists = false;
         dbx.filesListFolder({path: ''})
         .then(function(response) {
             response.entries.forEach(function(e) {
                 if (e.name == 'db.json') {
-                    db_exists = false;
+                    db_exists = true;
                 }
             })
             return db_exists;
         })
         .then(function(db_exists) {
-            if (db_exists == true) {
-                return dbx.filesUpload({path: '' + db.name, contents: db})
+            if (db_exists == false) {
+                return dbx.filesUpload({path: '/' + db.name, contents: db})
             }
             return Promise.resolve();
         })                
@@ -344,7 +344,7 @@ Data General Functions
 ----------------------------*/
 
 function get_map_data(url){
-    url = url || getCookieToken('url') || "https://dl.dropboxusercontent.com/s/0em1erbgdjbom93/db.json?dl=0";
+    url = url || getCookieToken('url') || "https://dl.dropboxusercontent.com/s/wip1207imbbxzia/db.json?dl=0";
     return get_url(url); // This is a promise
 }
 
@@ -368,7 +368,7 @@ function update_db(newRecords,url) {
                 return getSharedLink(newRecord.image,access_token)
                 .then(function(image_url){
                     newRecord['image_url'] = image_url;
-                    return getSharedLink('record_' + newRecord.id + '.json',access_token)
+                    return getSharedLink('/record_' + newRecord.id + '.json',access_token)
                     .then(function(record_url){
                        newRecord['record_url'] = record_url;
                        resolve(newRecord); 
@@ -530,7 +530,7 @@ function uploadFiles() {
         // Connect to dropbox
         var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });            
         file = new File(record, 'record_' + uid + '.json' ,{type: 'text/json;charset=utf-8'});        
-        dbx.filesUpload({path: file.name, contents: file})
+        dbx.filesUpload({path: '/' + file.name, contents: file})
   
             // Upload individual record file
             .then(dbx.filesUpload({path: filename, contents: image_file}))

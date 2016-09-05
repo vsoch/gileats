@@ -34,3 +34,5 @@ want to play around withmoreobjectoriented code,and making customelements (exten
 https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
 
 http://www.html5rocks.com/en/tutorials/internals/howbrowserswork/#Generating_parsers_automatically
+
+annoying - when listing files at base doesn't want '/' but bwhen uploading a file, does!
