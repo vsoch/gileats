@@ -195,7 +195,6 @@
         // Set the hidden field to be the authentication token
         var access_token = getAccessToken();
         document.getElementById('access-token').value = access_token; 
-        document.getElementById('url').value = getCookieToken('url'); 
 
         // Create an instance of Dropbox with the access token 
         var dbx = new Dropbox({ accessToken: access_token });

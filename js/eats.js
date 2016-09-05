@@ -370,7 +370,7 @@ Data General Functions
 ----------------------------*/
 
 function get_map_data(url){
-    url = url || getCookieToken('url') || "https://dl.dropboxusercontent.com/s/wip1207imbbxzia/db.json?dl=0";
+    url = url || getCookieToken('url') || "https://dl.dropboxusercontent.com/s/y2l1zq7tln9vzzb/db.json?dl=0";
     return get_url(url); // This is a promise
 }
 
