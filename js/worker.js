@@ -27,10 +27,6 @@ function workerJSON(url) {
 onmessage = function(e) {
 
     switch(e.data.command) {
-        case "updateMap":
-            console.log("Worker updating map!");
-            update_map();
-            break;
         case "getData":
             const result = JSON.parse(workerJSON(e.data.url));
             postMessage(result);

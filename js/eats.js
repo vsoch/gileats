@@ -43,7 +43,7 @@ map = new GMaps({
 	clickable: false
 });
 
-var image = '../img/favicon/apple-icon-57x57.png';
+var image = 'img/favicon/apple-icon-57x57.png';
 var gil = map.addMarker({
     lat: lat,
     lng: long,
