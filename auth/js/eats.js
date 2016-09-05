@@ -439,7 +439,9 @@ function update_db(newRecords,url) {
                     var record = {id:newRecord.id,
                                   image:newRecord.image,
                                   image_url:newRecord.image_url,
-                                  record_url:newRecord.record_url}
+                                  record_url:newRecord.record_url,
+                                  review:newRecord.review,
+                                  rating:newRecord.rating}
 
                     // Is the record in the current data?
                     var added = false;
@@ -466,6 +468,19 @@ function update_db(newRecords,url) {
     return promise;
 }
 
+/* Function to get info on a particular image (not in use)
+function getinfo(image_id) {
+    
+    // Get the data url from the hidden span 
+    var record_url = document.getElementById(image_id).getAttribute('data-url');
+
+    // Retrieve the data url that has meta data, etc.
+    get_url(record_url).then(function(result){
+       var image_caption = "<strong>Review:</strong> " + result.review + "<br><strong>Rating:</strong> " + result.rating + "/5 stars";
+       document.getElementById("record_" + image_id).setAttribute('data-caption',image_caption); 
+    })
+}*/
+
 // Function to update the map
 function update_map(url){
 
@@ -487,10 +502,10 @@ function update_map(url){
             var lng = parseFloat(e.location.split(" ")[1]);
 
             // Each location has multiple records with different pictures
-            contentstring = "<div id='content'><h2>" + e.name + "</h2>"
+            contentstring = "<h2>" + e.name + "</h2><div class='gallery'>"
             $.each(e.records,function(i,record){
-                console.log("Parsing picture " + record.image_url + " here...");
-                contentstring = contentstring + '<a href="'+ record.image_url+'" target="_blank"><img src="' + record.image_url +'" height="100px"></a>\n'
+                var image_caption = "<strong>Review:</strong> " + record.review + "<br><strong>Rating:</strong> " + record.rating + "/5 stars";
+                contentstring = contentstring + '<a data-caption="' + image_caption +'" id="record_' + record.id + '" href="'+ record.image_url +'"><img src="' + record.image_url +'" height="100px"></a>\n'
             });
             contentstring = contentstring + '</div>'
             
@@ -504,11 +519,13 @@ function update_map(url){
             // Generate info window dynamically when point is clicked
             datum.addListener('click', function() {
                 
-                // TODO: this needs to have the full (static) url without needing authentication!
                 var infowindow = new google.maps.InfoWindow({
                     content: this.content
                 });
+
+                // Initialize the image lightbox
                 infowindow.open(map.map, this);
+                baguetteBox.run('.gallery')
             })
         });
     
@@ -561,7 +578,6 @@ function uploadFiles() {
             .catch(function(error) {
                 console.error(error);
             })
-
             // Then upload image file
             .then(function(response) {
                 var results = document.getElementById('results');
@@ -570,16 +586,21 @@ function uploadFiles() {
              })
              .catch(function(error) {
                 console.error(error);
-             });
-
+             })
              // Add new result to current result
-             update_db(newRecord,url).then(function(data){
-                 // Save the result back to the database
-                 update_data(data,access_token)
-                   .then(function(newdata){
-                      console.log(newdata);
+             .then(function(response){
+
+                 console.log(newRecord);
+                 update_db(newRecord,url).then(function(data){
+                     // Save the result back to the database
+                     update_data(data,access_token)
+                         .then(function(newdata){
+                             update_map();
+                             var results = document.getElementById('results');
+                             results.textContent = '';
+                     });
                  });
-             });
+              });
 
         // If address and image not supplied, tell the user
         } else {
