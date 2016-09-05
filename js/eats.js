@@ -225,7 +225,6 @@ function getSharedLink(path,access_token) {
 
         var dbx = new Dropbox({ accessToken: access_token });            
         dbx.sharingCreateSharedLink({path: '/' + path}).then(function(response){
-            console.log(path);
             var sharedURL = response.url.replace('www.dropbox.com','dl.dropboxusercontent.com')
             resolve(sharedURL);
         }).catch(function(error){
@@ -283,7 +282,6 @@ function bigUpdate(access_token) {
 
                  // For each data object, write to new data file
                  update_db(results).then(function(newData){
-                     console.log(newData);
                      // Save the result back to the database
                      update_data(newData,access_token);
                  }).catch(function(err) {
@@ -306,7 +304,6 @@ function create_db(overwrite){
              return getSharedLink(db.name,access_token).then(function(sharedURL){
              $.cookie('url',sharedURL);
              url = sharedURL;
-             console.log(sharedURL);
              resolve(sharedURL);
              })
         })
@@ -331,7 +328,6 @@ function create_db(overwrite){
                     return getSharedLink(db.name,access_token).then(function(sharedURL){
                     $.cookie('url',sharedURL);
                     url = sharedURL;
-                    console.log(sharedURL);
                     resolve(sharedURL);
                 })
               })
@@ -559,7 +555,6 @@ function uploadFiles() {
             .then(function(response) {
                 var results = document.getElementById('results');
                 results.textContent = 'Image and data uploaded, dawg!';
-                console.log(response);
              })
              .catch(function(error) {
                 console.error(error);
@@ -567,7 +562,6 @@ function uploadFiles() {
              // Add new result to current result
              .then(function(response){
 
-                 console.log(newRecord);
                  update_db(newRecord,url).then(function(data){
                      // Save the result back to the database
                      update_data(data,access_token)
