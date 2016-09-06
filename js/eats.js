@@ -592,6 +592,7 @@ function uploadFiles() {
                      return update_data(data,access_token)
                          .then(function(newdata){
                              update_map();
+                             datawindow.close();
                              var results = document.getElementById('results');
                              results.textContent = '';
                          })
