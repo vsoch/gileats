@@ -587,13 +587,19 @@ function uploadFiles() {
                  // Finally, add new result to current result
                  update_db(newRecord,url).then(function(data){
                      // Save the result back to the database
-                     update_data(data,access_token)
+                     return update_data(data,access_token)
                          .then(function(newdata){
                              update_map();
                              var results = document.getElementById('results');
                              results.textContent = '';
-                         });
-                 });
+                         })
+                         .catch(function(error) {
+                             console.error(error);
+                         })
+                 })
+                 .catch(function(error) {
+                     console.error(error);
+                 })
              })
              .catch(function(error) {
                 console.error(error);
