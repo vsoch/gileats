@@ -455,7 +455,8 @@ function update_db(newRecords,url) {
                    }    
                }
                resolve(data);
-           });    
+            });
+            resolve(data);  
         });
         return promise;
     });
