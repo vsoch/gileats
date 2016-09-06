@@ -579,9 +579,9 @@ function uploadFiles() {
         .then(function(response) {
 
              dbx.filesUpload({path: '/' + filename, contents: image_file})
-            .then(function(response) {
-                var results = document.getElementById('results');
-                results.textContent = 'Image and data uploaded, dawg!';
+             .then(function(response) {
+                 var results = document.getElementById('results');
+                 results.textContent = 'Image and data uploaded, dawg!';
 
                  // Finally, add new result to current result
                  update_db(newRecord,url).then(function(data){
@@ -592,8 +592,7 @@ function uploadFiles() {
                              var results = document.getElementById('results');
                              results.textContent = '';
                          });
-                     });
-                  });
+                 });
              })
              .catch(function(error) {
                 console.error(error);
