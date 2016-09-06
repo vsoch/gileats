@@ -571,24 +571,19 @@ function uploadFiles() {
         // Connect to dropbox
         var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });            
         file = new File(record, 'record_' + uid + '.json' ,{type: 'text/json;charset=utf-8'});        
+
+        // Upload individual record file
         dbx.filesUpload({path: '/' + file.name, contents: file})
   
-            // Upload individual record file
-            .then(dbx.filesUpload({path: '/' + filename, contents: image_file}))
-            .catch(function(error) {
-                console.error(error);
-            })
-            // Then upload image file
+        // Then upload image file
+        .then(function(response) {
+
+             dbx.filesUpload({path: '/' + filename, contents: image_file})
             .then(function(response) {
                 var results = document.getElementById('results');
                 results.textContent = 'Image and data uploaded, dawg!';
-             })
-             .catch(function(error) {
-                console.error(error);
-             })
-             // Add new result to current result
-             .then(function(response){
 
+                 // Finally, add new result to current result
                  update_db(newRecord,url).then(function(data){
                      // Save the result back to the database
                      update_data(data,access_token)
@@ -596,16 +591,27 @@ function uploadFiles() {
                              update_map();
                              var results = document.getElementById('results');
                              results.textContent = '';
+                         });
                      });
-                 });
-              });
+                  });
+             })
+             .catch(function(error) {
+                console.error(error);
+             })
+        })
 
-        // If address and image not supplied, tell the user
-        } else {
-            var results = document.getElementById('results');
-            results.textContent="Where is the food picture and address? :(";
-        }
-        return false
+        // catch for upload of record file    
+        .catch(function(error) {
+            console.error(error);
+        })
+        
+
+    // If address and image not supplied, tell the user
+    } else {
+         var results = document.getElementById('results');
+        results.textContent="Where is the food picture and address? :(";
     }
+    return false
+}
 
 update_map();
