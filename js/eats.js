@@ -37,7 +37,7 @@ Google Map Customization
 
 var map;
 var url;
-var infowindow;
+var datawindow;
 var lat = 37.3861;
 var long = -122.0839;
 
@@ -518,12 +518,12 @@ function update_map(url){
                 // Generate info window dynamically when point is clicked
                 datum.addListener('click', function() {
                 
-                    var infowindow = new google.maps.InfoWindow({
+                    datawindow = new google.maps.InfoWindow({
                         content: this.content
                     });
 
                     // Initialize the image lightbox
-                    infowindow.open(map.map, this);
+                    datawindow.open(map.map, this);
                     baguetteBox.run('.gallery')
                 })
               }
