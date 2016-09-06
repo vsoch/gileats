@@ -552,7 +552,7 @@ function uploadFiles() {
         var review = document.getElementById('review').value
 
         // Create uid for the entry, based on upload time and everything else
-        upload_date = Date()
+        var upload_date = Date()
         var uid = (loc + datestr + rating + review + upload_date).hashCode()
 
         // Here is our image file
