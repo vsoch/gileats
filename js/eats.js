@@ -456,10 +456,10 @@ function update_db(newRecords,url) {
                }
                resolve(data);
             });
-            resolve(data);  
+            resolve(data);
         });
-        return promise;
     });
+    return promise;
 }
 
 /* Function to get info on a particular image (not in use)
